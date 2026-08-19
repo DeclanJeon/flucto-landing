@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-flucto-landing
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bake version from flucto repo + local
+        run: |
+          FLUCTO_VER=$(gh api repos/DeclanJeon/flucto/releases/latest --jq .tag_name 2>/dev/null | sed 's/^v//')
+          if [ -z "$FLUCTO_VER" ]; then FLUCTO_VER=$(gh api repos/DeclanJeon/flucto --jq '.description' 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1); fi
+          echo "Flucto latest: $FLUCTO_VER"
+          echo "{\"version\":\"$FLUCTO_VER\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > public/version.json
+          # Inject into App.tsx version badge if present
+          if grep -q "v1\\.13" src/App.tsx; then
+            sed -i "s/v1\\.[0-9]*\\.[0-9]*/v${FLUCTO_VER}/g" src/App.tsx
+          fi
+          cat public/version.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: npm run build
+
+      - name: Deploy to ponslink
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "dist/*"
+          target: "/var/www/flucto.ponslink.com"
+          strip_components: 1
+          overwrite: true
+
+      - name: Fix perms
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
+            sudo chmod -R 755 /var/www/flucto.ponslink.com
+            echo "Deployed $(date -u +%Y-%m-%dT%H:%M:%SZ) — version $(cat /var/www/flucto.ponslink.com/version.json 2>/dev/null || echo unknown)"
+            curl -Is https://flucto.ponslink.com/version.json 2>&1 | head -n 5 || true

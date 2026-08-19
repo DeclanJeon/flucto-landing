@@ -293,7 +293,7 @@ fl u check -j`}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-xs">
           <a href="https://github.com/DeclanJeon/flucto" target="_blank" rel="noopener" className="rounded-full border border-white/10 px-3 py-1.5 text-white/60 hover:bg-white/10">DeclanJeon/flucto · MIT</a>
-          <span className="rounded-full border border-white/10 px-3 py-1.5 text-white/30">v1.13.2 · 100% TypeScript</span>
+          <span className="rounded-full border border-white/10 px-3 py-1.5 text-white/30">v1.14.0 · 100% TypeScript</span>
           <span className="rounded-full border border-white/10 px-3 py-1.5 text-white/30">Independent project</span>
         </div>
       </main>
