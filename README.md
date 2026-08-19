@@ -1,32 +1,34 @@
-# React + TypeScript + Vite
+# Flucto Landing
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Marketing landing page for **Flucto** — a 100% TypeScript CLI that turns any video/audio/article URL into transcripts, clips, and Markdown notes.
 
-Currently, two official plugins are available:
+- **Live:** https://flucto.ponslink.com
+- **Product repo:** https://github.com/DeclanJeon/flucto
+- **Releases:** https://github.com/DeclanJeon/flucto/releases
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+React 19 + TypeScript + Vite + Tailwind CSS v4 + Framer Motion. Lint via Oxlint.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm ci
+npm run dev      # localhost:5173
+npm run build    # outputs dist/
+npm run preview  # serve the build
+npm run lint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Internationalization
+
+UI strings live in `src/i18n.ts` (`dict.ko` / `dict.en`). On load, `detectLang()` picks the language from the browser (`navigator.languages` → `ko` if any lang starts with `ko-`, otherwise `en`). The `<html lang>` attribute and a `languagechange` listener keep it in sync.
+
+The manual **KO / EN** toggle is hidden by default. Append `?i18n=1` to the URL (e.g. `https://flucto.ponslink.com/?i18n=1`) to reveal it for QA.
+
+## Deployment
+
+Pushing to `main` triggers `.github/workflows/deploy.yml`: it bakes the latest Flucto release tag into `public/version.json`, builds with Vite, then `scp`s `dist/*` to the ponslink host. The footer fetches `/version.json` at runtime and displays `v{version}`.
+
+## Notes
+
+- Static SPA only — meta tags don't swap per language (SEO/SSR not implemented).
+- `appleboy/scp-action@v1` was replaced with raw `ssh`/`scp` in the workflow due to a silent deploy failure.

@@ -31,11 +31,6 @@ jobs:
           if [ -z "$FLUCTO_VER" ]; then FLUCTO_VER="1.14.0"; fi
           echo "Flucto latest: $FLUCTO_VER"
           echo "{\"version\":\"$FLUCTO_VER\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > public/version.json
-          if grep -q "v1\\.14" src/App.tsx; then
-            sed -i "s/v1\\.[0-9]*\\.[0-9]*/v${FLUCTO_VER}/g" src/App.tsx
-          elif grep -q "v1\\.13" src/App.tsx; then
-            sed -i "s/v1\\.[0-9]*\\.[0-9]*/v${FLUCTO_VER}/g" src/App.tsx
-          fi
           cat public/version.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
