@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@500;600;700;800&display=swap');
+
+:root{
+  --bg:#070b16;
+  --bg2:#0d1324;
+  --line:rgba(255,255,255,.12);
+  --fg:#f4f7ff;
+  --muted:#98a2b3;
+  --a1:#7a66ff;
+  --a2:#44c3ff;
+  --a3:#14d6b2;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:'Sora','Manrope','Segoe UI',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--fg);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.bg-noise{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(40rem 40rem at 10% 10%, rgba(116,104,255,.15), transparent 55%),
+    radial-gradient(32rem 32rem at 90% 0%, rgba(20,214,178,.14), transparent 48%),
+    linear-gradient(135deg, rgba(255,255,255,.02) 0%, transparent 42%);
+}
+.glass{ background:rgba(255,255,255,.05); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.10) }
+.kbd{font:12px ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:2px 6px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:4px}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--a2),var(--a3));border-radius:4px}
+::selection{background:rgba(59,130,246,.3);color:#fff}
