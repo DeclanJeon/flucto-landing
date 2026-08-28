@@ -4,7 +4,7 @@ import {
   ArrowDown, ArrowRight, Boxes, Check, Copy, Download, FileText, FolderOpen,
   Globe, Languages, Play, ShieldCheck, Sparkles, Star, Terminal, Zap, Layers, BookOpen,
 } from 'lucide-react'
-import { detectLang, dict, marqueePlatforms } from './i18n'
+import { defaultLang, dict, marqueePlatforms, type Lang } from './i18n'
 import { animateCount, fetchGitHubStats, formatCompact, type GitHubStats } from './github'
 
 const REPO_URL = 'https://github.com/DeclanJeon/flucto'
@@ -60,9 +60,8 @@ const Stat = ({ value, label, suffix = '' }: { value: number | string | null; la
 }
 
 export default function App() {
-  const [lang, setLang] = useState(() => detectLang())
+  const [lang, setLang] = useState<Lang>(defaultLang)
   const t = dict[lang]
-  const showLangToggle = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('i18n') === '1'
   const [copied, setCopied] = useState<string | null>(null)
   const [version, setVersion] = useState<string | null>(null)
   const [stats, setStats] = useState<GitHubStats | null>(null)
@@ -75,12 +74,6 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
-
-  useEffect(() => {
-    const onLangChange = () => setLang(detectLang())
-    window.addEventListener('languagechange', onLangChange)
-    return () => window.removeEventListener('languagechange', onLangChange)
-  }, [])
 
   useEffect(() => {
     fetch('/version.json')
@@ -128,15 +121,13 @@ export default function App() {
             </div>
           </a>
           <div className="flex items-center gap-2">
-            {showLangToggle && (
-              <button
-                onClick={() => setLang((l) => (l === 'ko' ? 'en' : 'ko'))}
-                className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
-                title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
-              >
-                <Languages size={12} /> {lang === 'ko' ? 'EN' : 'KO'}
-              </button>
-            )}
+            <button
+              onClick={() => setLang((l) => (l === 'ko' ? 'en' : 'ko'))}
+              className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
+              title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
+            >
+              <Languages size={12} /> {lang === 'ko' ? 'EN' : 'KO'}
+            </button>
             <a
               href={REPO_URL}
               target="_blank"

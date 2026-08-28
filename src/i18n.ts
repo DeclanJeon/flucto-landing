@@ -1,12 +1,6 @@
 export type Lang = 'ko' | 'en'
 
-export function detectLang(): Lang {
-  if (typeof navigator === 'undefined') return 'ko'
-  const langs = navigator.languages?.length ? navigator.languages : [navigator.language]
-  const primary = (langs[0] || '').toLowerCase()
-  if (primary === 'ko' || primary.startsWith('ko-')) return 'ko'
-  return 'en'
-}
+export const defaultLang: Lang = 'en'
 
 type Dict = {
   navTag: string
