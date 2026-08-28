@@ -375,6 +375,84 @@ export default function App() {
         </div>
       </section>
 
+      {/* ---------- CLI-only install guide ---------- */}
+      <section className="hairline relative z-10 mx-auto max-w-6xl px-5 py-20">
+        <p className="eyebrow">{t.cliGuideKicker}</p>
+        <h2 className="display mt-4 text-[clamp(2rem,5vw,3.6rem)]">{t.cliGuideTitle}</h2>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">{t.cliGuideSub}</p>
+
+        <div className="mt-10 grid gap-4 lg:grid-cols-5">
+          {/* install steps */}
+          <div className="space-y-3 lg:col-span-3">
+            {[
+              {
+                n: '1',
+                title: t.cliGuideStep1Title,
+                note: t.cliGuideStep1Note,
+                cmd: 'git clone https://github.com/DeclanJeon/flucto && cd flucto && npm install && npm run build:electron && npm link',
+                key: 'cli-install',
+              },
+              {
+                n: '2',
+                title: t.cliGuideStep2Title,
+                note: t.cliGuideStep2Note,
+                cmd: 'fl doc -j && fl s --yt-dlp-only -j',
+                key: 'cli-verify',
+              },
+              {
+                n: '3',
+                title: t.cliGuideStep3Title,
+                note: t.cliGuideStep3Note,
+                cmd: 'fl t "https://www.youtube.com/watch?v=…" -l en -o ./notes -j',
+                key: 'cli-run',
+              },
+            ].map((step) => (
+              <div key={step.n} className="card card-sheen p-5" onMouseMove={sheen}>
+                <div className="flex items-center gap-3">
+                  <span className="display flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#3ee0ff]/15 text-sm accent">{step.n}</span>
+                  <span className="text-sm font-semibold">{step.title}</span>
+                  <span className="ml-auto hidden text-xs text-white/35 sm:inline">{step.note}</span>
+                </div>
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/5 bg-black/40 px-3 py-2.5">
+                  <span className="accent shrink-0 font-mono text-xs">❯</span>
+                  <code className="min-w-0 flex-1 break-all font-mono text-[11.5px] leading-relaxed text-white/75">{step.cmd}</code>
+                  <button
+                    onClick={() => void copy(step.cmd, step.key)}
+                    className="pill shrink-0 bg-white/[.03] p-1.5 text-white/50 hover:text-white"
+                    aria-label={`copy ${step.title}`}
+                  >
+                    {copied === step.key ? <Check size={12} className="accent" /> : <Copy size={12} />}
+                  </button>
+                </div>
+              </div>
+            ))}
+            <p className="pill inline-flex bg-white/[.03] px-3 py-1.5 font-mono text-[11px] text-white/35">
+              {t.cliGuideNpmSoon}
+            </p>
+          </div>
+
+          {/* AI agent prompt card */}
+          <motion.div {...reveal} transition={{ duration: 0.7 }} className="card card-edge p-6 lg:col-span-2">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="accent" />
+              <h3 className="display text-xl leading-tight">{t.agentTitle}</h3>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-white/55">{t.agentDesc}</p>
+            <div className="relative mt-4 rounded-xl border border-[#3ee0ff]/20 bg-[#3ee0ff]/[.04] p-4">
+              <p className="font-mono text-[11.5px] leading-relaxed text-white/80">“{t.agentPrompt}”</p>
+              <button
+                onClick={() => void copy(t.agentPrompt, 'agent-prompt')}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#3ee0ff] px-3 py-1.5 text-xs font-bold text-[#04060c] transition hover:bg-[#7deaff]"
+              >
+                {copied === 'agent-prompt' ? <Check size={12} /> : <Copy size={12} />}
+                {copied === 'agent-prompt' ? 'Copied' : 'Copy prompt'}
+              </button>
+            </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-white/30">{t.agentHint}</p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ---------- how it works ---------- */}
       <section className="hairline relative z-10 mx-auto max-w-6xl px-5 py-20">
         <p className="eyebrow">{t.howKicker}</p>
