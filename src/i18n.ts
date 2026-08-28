@@ -4,36 +4,52 @@ export function detectLang(): Lang {
   if (typeof navigator === 'undefined') return 'ko'
   const langs = navigator.languages?.length ? navigator.languages : [navigator.language]
   const primary = (langs[0] || '').toLowerCase()
-  // ko, ko-KR, ko-KP -> ko; everything else -> en
   if (primary === 'ko' || primary.startsWith('ko-')) return 'ko'
   return 'en'
 }
 
 type Dict = {
-  headerTag: string
-  heroBadge: string
-  heroTitleA: string
-  heroTitleB: string
-  heroLeadA: string
-  heroLeadB: string
+  navTag: string
+  heroKicker: string
+  heroLine1: string
+  heroLine2: string
+  heroSerif: string
+  heroLead: string
   heroNote: string
   ctaDownload: string
   ctaGithub: string
-  ctaHow: string
-  stat1: string
-  quickTitle: string
-  quickDesc: string
-  inputPlaceholder: string
-  modeCaptionMd: string
-  modeMp3: string
-  modeMp4: string
-  featureUniversalTitle: string
-  featureUniversalDesc: string
-  featureBatchTitle: string
-  featureBatchDesc: string
-  featureTranscriptTitle: string
-  featureTranscriptDesc: string
-  howBadge: string
+  ctaScroll: string
+  starCta: string
+  starTip: string
+  statsStars: string
+  statsDownloads: string
+  statsPlatforms: string
+  statsRelease: string
+  statsFootnote: string
+  manifestoKicker: string
+  manifesto1: string
+  manifesto1Accent: string
+  manifesto2: string
+  manifesto2Accent: string
+  bentoKicker: string
+  bentoTitle: string
+  bento1Title: string
+  bento1Desc: string
+  bento2Title: string
+  bento2Desc: string
+  bento3Title: string
+  bento3Desc: string
+  bento4Title: string
+  bento4Desc: string
+  bento5Title: string
+  bento5Desc: string
+  bento6Title: string
+  bento6Desc: string
+  demoKicker: string
+  demoTitle: string
+  demoCaption: string
+  cliNote: string
+  howKicker: string
   howTitle: string
   howStep1Title: string
   howStep1Desc: string
@@ -41,142 +57,147 @@ type Dict = {
   howStep2Desc: string
   howStep3Title: string
   howStep3Desc: string
-  demoFxA: string
-  demoFxB: string
+  personaKicker: string
   personaTitle: string
   personaA: string
   personaB: string
   personaC: string
-  trust1Title: string
-  trust1Desc: string
-  trust2Title: string
-  trust2Desc: string
-  trust3Title: string
-  trust3Desc: string
-  cliTitle: string
-  cliNote: string
-  cliHint: string
-  previewTitle: string
-  previewHint: string
-  previewEmpty: string
-  previewQueued: string
-  bottomTitle: string
+  bottomTitleA: string
+  bottomTitleSerif: string
+  bottomTitleB: string
   bottomDesc: string
   bottomCtaA: string
-  bottomCtaB: string
+  footerRights: string
+  footerVersion: string
 }
+
+const platforms = 'YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo'
 
 export const dict: Record<Lang, Dict> = {
   ko: {
-    headerTag: 'Capture · Transcript · Archive',
-    heroBadge: 'FOR CREATORS · RESEARCHERS · CURATORS',
-    heroTitleA: '링크는 흩어지고,',
-    heroTitleB: '기록은 남아야 한다.',
-    heroLeadA: 'Flucto는 YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo에서 미디어를 한 번에 받고, 가능한 자막을 타임스탬프가 있는 깔끔한 Markdown으로 바꿔준다.',
-    heroLeadB: '데스크톱 앱과 fl CLI가 같은 엔진으로 동작하고, 자막이 없으면 “unavailable”로 정확히 알린다.',
-    heroNote: '수백 개 URL도 큐로 쌓이고, 채널 전체도 폴더 하나로 정리된다. 로컬 우선 · 추적 없음 · yt-dlp / ffmpeg 자동 설치.',
-    ctaDownload: 'Free download',
-    ctaGithub: 'View on GitHub',
-    ctaHow: 'How it works',
-    stat1: 'Open source · MIT · ★ 5',
-    quickTitle: 'Start in 30 seconds',
-    quickDesc: '설치 후 fl doc -j 로 점검, fl s -j 로 바이너리 자동 설치',
-    inputPlaceholder: 'Paste any link — YouTube, X, Reddit, Bilibili, Instagram…',
-    modeCaptionMd: 'Captions → searchable Markdown',
-    modeMp3: 'Audio extraction',
-    modeMp4: 'Full video',
-    featureUniversalTitle: 'One app for 8 platforms',
-    featureUniversalDesc: 'YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo. PlatformAdapter 플러그인 — 새 플랫폼은 파일 하나로 추가.',
-    featureBatchTitle: 'Queue that never scatters',
-    featureBatchDesc: '단일 URL, 플레이리스트, .txt 리스트, 채널 전체까지 큐로. Bounded concurrency로 수백 개도 안정적.',
-    featureTranscriptTitle: 'Caption → Markdown you can search',
-    featureTranscriptDesc: 'JSON3/XML/VTT 파싱, 마크업 제거, 문단화, 언어 선택(en/auto), 타임스탬프·메타데이터 포함. 없으면 없다고 알린다.',
-    howBadge: 'HOW IT WORKS',
-    howTitle: '복사 · 선택 · 정리 — 세 단계로 끝',
+    navTag: '캡처 · 전사 · 아카이브',
+    heroKicker: 'CREATORS · RESEARCHERS · CURATORS',
+    heroLine1: '링크는 썩어도,',
+    heroLine2: '기록은',
+    heroSerif: '남는다.',
+    heroLead: 'Flucto는 흩어진 미디어를 한 번에 담고, 자막을 검색 가능한 Markdown으로 바꾼다. 데스크톱 앱과 fl CLI가 같은 엔진 — 수집부터 아카이브까지, 한 흐름으로.',
+    heroNote: '로컬 우선 · 추적 없음 · yt-dlp / ffmpeg 자동 구성 · MIT 라이선스',
+    ctaDownload: '무료로 받기',
+    ctaGithub: 'GitHub에서 보기',
+    ctaScroll: '아래로 스크롤',
+    starCta: 'Star',
+    starTip: 'GitHub에서 별을 누르면 개발에 큰 힘이 됩니다',
+    statsStars: 'GitHub Stars',
+    statsDownloads: '누적 다운로드',
+    statsPlatforms: '지원 플랫폼',
+    statsRelease: '최신 릴리스',
+    statsFootnote: '다운로드 수는 모든 GitHub 릴리스 자산의 실제 집계값입니다 — 10분마다 갱신',
+    manifestoKicker: 'WHY FLUCTO',
+    manifesto1: '영상 링크는 계정이 사라지고, 시청 제한이 걸리고, 플랫폼이 사라지면 함께 증발한다.',
+    manifesto1Accent: '당신의 시간은 자산이다.',
+    manifesto2: 'Flucto는 자막을 문단과 타임스탬프가 살아있는 Markdown으로 바꿔, 검색하고 인용하고 다시 쓸 수 있는 지식으로 만든다.',
+    manifesto2Accent: '그래서 기록은 남는다.',
+    bentoKicker: 'CAPABILITIES',
+    bentoTitle: '하나의 흐름, 여덟 개의 문',
+    bento1Title: '8개 플랫폼, 하나의 앱',
+    bento1Desc: 'YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo. 어댑터 구조라 새 플랫폼은 파일 하나로 추가된다.',
+    bento2Title: '흩어지지 않는 큐',
+    bento2Desc: 'URL 하나, 플레이리스트, .txt 목록, 채널 전체 — 수백 개도 bounded concurrency로 안정적으로.',
+    bento3Title: '자막 → 검색되는 Markdown',
+    bento3Desc: 'JSON3·XML·VTT 파싱, HTML 제거, 문단화, 타임스탬프. 자막이 없으면 없다고 정확히 말한다.',
+    bento4Title: '프라이버시 첫 번째',
+    bento4Desc: '전부 로컬 처리. 추적 없음, 클라우드 업로드 없음. 내 폴더에서 끝난다.',
+    bento5Title: '데스크톱 + CLI, 같은 엔진',
+    bento5Desc: 'Electron UI와 fl CLI가 같은 TypeScript 서비스 레이어를 공유한다. AI 에이전트·CI에 그대로 붙는다.',
+    bento6Title: '30초 셋업',
+    bento6Desc: 'fl s 한 줄로 yt-dlp·ffmpeg 자동 구성. 시스템 패키지 매니저는 건드리지 않는다.',
+    demoKicker: 'SEE IT WORK',
+    demoTitle: '채널 하나가 폴더 하나로',
+    demoCaption: 'channel to-md · 타임스탬프 전용 폴더 · 노트는 즉시 검색 가능',
+    cliNote: 'AI 에이전트·CI·배치를 위한 머신 친화 출력 — --json / --progress-json',
+    howKicker: 'HOW IT WORKS',
+    howTitle: '붙여넣고, 고르고, 모은다',
     howStep1Title: 'Paste',
-    howStep1Desc: '링크 하나, 리스트, 채널 핸들 — 붙여넣으면 미리보기와 포맷을 확인한다.',
+    howStep1Desc: '링크, 리스트, 채널 핸들 — 붙여넣으면 미리보기와 포맷이 확인된다.',
     howStep2Title: 'Choose',
-    howStep2Desc: 'MP4(영상) · MP3(오디오) · MD(자막→Markdown) 중 목적을 고른다.',
+    howStep2Desc: 'MP4 · MP3 · MD(자막→Markdown) — 목적에 맞는 출력을 고른다.',
     howStep3Title: 'Collect',
-    howStep3Desc: '다운로드는 Captures, 노트는 Notes — 작업 단위 전용 폴더로 깔끔히 정리된다.',
-    demoFxA: '채널:',
-    demoFxB: '배치:',
-    personaTitle: '누가 쓰나',
-    personaA: '<b>크리에이터</b> — 숏폼·릴스 소스 보관과 재편집 레퍼런스',
+    howStep3Desc: '영상은 Captures, 노트는 Notes — 작업 단위 폴더로 정리 완료.',
+    personaKicker: 'WHO IT IS FOR',
+    personaTitle: '기록이 자산인 사람들',
+    personaA: '<b>크리에이터</b> — 숏폼·릴스 소스를 보관하고 재편집 레퍼런스로',
     personaB: '<b>리서처</b> — 강의·인터뷰 자막을 검색 가능한 노트로',
-    personaC: '<b>큐레이터</b> — 채널/리스트를 주제별 Markdown 아카이브로',
-    trust1Title: 'Privacy first',
-    trust1Desc: '로컬 처리 · 추적 없음 · 썸네일 프록시. 클라우드 업로드 없이 내 폴더에서 끝난다.',
-    trust2Title: 'Desktop + CLI same engine',
-    trust2Desc: 'Electron UI와 fl/flucto CLI가 같은 TypeScript 서비스 레이어. 자동화에 바로 붙는다.',
-    trust3Title: 'Zero-config setup',
-    trust3Desc: 'fl s 로 yt-dlp/ffmpeg 자동 구성. 시스템 패키지 매니저를 건드리지 않는다.',
-    cliTitle: 'CLI — 창 없이 흐르는 워크플로우',
-    cliNote: 'AI 에이전트·CI·배치에 그대로 붙는 머신 친화 출력',
-    cliHint: '--json stdout 최종 객체 · --progress-json stderr NDJSON · 다중 파일은 항상 전용 하위 폴더 생성',
-    previewTitle: 'Try it — landing preview',
-    previewHint: 'URL을 넣고 Enter',
-    previewEmpty: '위 입력창에 URL을 넣고 Enter — 실제 앱의 MainDownloader 카드와 같은 흐름으로 쌓인다.',
-    previewQueued: 'Queued · will resolve via yt-dlp in app',
-    bottomTitle: '영상은 흐름, 자막은 자산',
-    bottomDesc: '툴을 옮겨 다니지 말고, 한 흐름에서 받고 바로 Markdown으로 정리하라. Flucto는 수집부터 아카이브까지의 마지막 변환을 맡는다.',
-    bottomCtaA: 'Download free',
-    bottomCtaB: 'Star on GitHub',
+    personaC: '<b>큐레이터</b> — 채널·리스트를 주제별 Markdown 아카이브로',
+    bottomTitleA: '영상은 흐르고,',
+    bottomTitleSerif: '자막은 자산이 된다',
+    bottomTitleB: '',
+    bottomDesc: '툴을 옮겨 다니지 마라. 한 번 담고, Markdown으로 남겨라. Flucto가 수집부터 아카이브까지의 마지막 변환을 맡는다.',
+    bottomCtaA: '무료로 시작하기',
+    footerRights: 'Independent project · MIT License',
+    footerVersion: '최신 안정 버전',
   },
   en: {
-    headerTag: 'Capture · Transcript · Archive',
-    heroBadge: 'FOR CREATORS · RESEARCHERS · CURATORS',
-    heroTitleA: 'Links scatter.',
-    heroTitleB: 'Knowledge should stay.',
-    heroLeadA: 'Flucto captures media from YouTube, X, Reddit, Bilibili, Instagram, Threads, TikTok, and Vimeo — and turns available captions into clean, timestamped Markdown.',
-    heroLeadB: 'The desktop app and the fl CLI share the same engine. If captions are missing, it says unavailable — no silent fallback.',
-    heroNote: 'Hundreds of URLs queue reliably; a whole channel lands in one job folder. Local-first · No tracking · Auto yt-dlp / ffmpeg.',
-    ctaDownload: 'Free download',
+    navTag: 'Capture · Transcript · Archive',
+    heroKicker: 'CREATORS · RESEARCHERS · CURATORS',
+    heroLine1: 'LINKS ROT.',
+    heroLine2: 'ARCHIVES',
+    heroSerif: 'don’t.',
+    heroLead: 'Flucto captures scattered media in one flow and turns captions into searchable Markdown. The desktop app and the fl CLI share the same engine — from capture to archive.',
+    heroNote: 'Local-first · No tracking · Auto yt-dlp / ffmpeg · MIT licensed',
+    ctaDownload: 'Download free',
     ctaGithub: 'View on GitHub',
-    ctaHow: 'How it works',
-    stat1: 'Open source · MIT · ★ 5',
-    quickTitle: 'Start in 30 seconds',
-    quickDesc: 'After install, verify with fl doc -j, then set up binaries with fl s -j',
-    inputPlaceholder: 'Paste any link — YouTube, X, Reddit, Bilibili, Instagram…',
-    modeCaptionMd: 'Captions → searchable Markdown',
-    modeMp3: 'Audio extraction',
-    modeMp4: 'Full video',
-    featureUniversalTitle: 'One app for 8 platforms',
-    featureUniversalDesc: 'YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo. PlatformAdapter plugin — add a platform with one file.',
-    featureBatchTitle: 'A queue that never scatters',
-    featureBatchDesc: 'Single URL, playlist, .txt lists, or an entire channel — all queued. Bounded concurrency keeps hundreds stable.',
-    featureTranscriptTitle: 'Caption → Markdown you can search',
-    featureTranscriptDesc: 'JSON3/XML/VTT parsing, markup cleanup, paragraph grouping, language pick (en/auto), timestamps & metadata. Honest when unavailable.',
-    howBadge: 'HOW IT WORKS',
-    howTitle: 'Paste · Choose · Collect — three steps',
+    ctaScroll: 'Scroll to explore',
+    starCta: 'Star',
+    starTip: 'A star on GitHub keeps this project alive',
+    statsStars: 'GitHub Stars',
+    statsDownloads: 'Total downloads',
+    statsPlatforms: 'Platforms',
+    statsRelease: 'Latest release',
+    statsFootnote: 'Download counts are real aggregates across all GitHub release assets — refreshed every 10 minutes',
+    manifestoKicker: 'WHY FLUCTO',
+    manifesto1: 'Video links evaporate — accounts vanish, embeds break, platforms shut down and take your library with them.',
+    manifesto1Accent: 'Your attention is an asset.',
+    manifesto2: 'Flucto converts captions into Markdown with living paragraphs and timestamps — knowledge you can search, quote, and rewrite.',
+    manifesto2Accent: 'That is what stays.',
+    bentoKicker: 'CAPABILITIES',
+    bentoTitle: 'One flow. Eight doors.',
+    bento1Title: '8 platforms, one app',
+    bento1Desc: 'YouTube · X · Reddit · Bilibili · Instagram · Threads · TikTok · Vimeo. Adapter architecture — a new platform is one file away.',
+    bento2Title: 'A queue that never scatters',
+    bento2Desc: 'One URL, a playlist, a .txt list, an entire channel — hundreds stay stable on bounded concurrency.',
+    bento3Title: 'Captions → searchable Markdown',
+    bento3Desc: 'JSON3·XML·VTT parsing, markup cleanup, paragraphing, timestamps. When captions are missing, it says so — no silent fallback.',
+    bento4Title: 'Privacy, first',
+    bento4Desc: 'Everything runs locally. No tracking, no cloud upload. It ends in your folders.',
+    bento5Title: 'Desktop + CLI, one engine',
+    bento5Desc: 'The Electron UI and fl CLI share the same TypeScript service layer — plug straight into agents and CI.',
+    bento6Title: '30-second setup',
+    bento6Desc: 'fl s provisions yt-dlp and ffmpeg automatically. No system package manager touched.',
+    demoKicker: 'SEE IT WORK',
+    demoTitle: 'A channel in, one folder out',
+    demoCaption: 'channel to-md · dedicated timestamped folder · notes are instantly searchable',
+    cliNote: 'Machine-friendly output for AI agents, CI, and batch jobs — --json / --progress-json',
+    howKicker: 'HOW IT WORKS',
+    howTitle: 'Paste. Choose. Collect.',
     howStep1Title: 'Paste',
-    howStep1Desc: 'A single link, a list, or a channel handle — paste to preview and verify formats.',
+    howStep1Desc: 'A link, a list, or a channel handle — paste to preview and verify formats.',
     howStep2Title: 'Choose',
-    howStep2Desc: 'Pick MP4 (video), MP3 (audio), or MD (captions → Markdown) for the job.',
+    howStep2Desc: 'MP4 · MP3 · MD (captions → Markdown) — pick the output the job needs.',
     howStep3Title: 'Collect',
-    howStep3Desc: 'Videos go to Captures, notes to Notes — each job in its own tidy folder.',
-    demoFxA: 'Channel:',
-    demoFxB: 'Batch:',
-    personaTitle: 'Who uses it',
-    personaA: '<b>Creators</b> — archive Shorts/Reels sources and reference for re-edits',
+    howStep3Desc: 'Videos land in Captures, notes in Notes — every job in its own tidy folder.',
+    personaKicker: 'WHO IT IS FOR',
+    personaTitle: 'People whose records are assets',
+    personaA: '<b>Creators</b> — archive Shorts/Reels sources as re-edit references',
     personaB: '<b>Researchers</b> — turn lecture & interview captions into searchable notes',
-    personaC: '<b>Curators</b> — channel/playlists into topic-based Markdown archives',
-    trust1Title: 'Privacy first',
-    trust1Desc: 'Local processing · No tracking · Proxied thumbnails. No cloud upload — it stays in your folders.',
-    trust2Title: 'Desktop + CLI same engine',
-    trust2Desc: 'Electron UI and fl/flucto CLI share the same TypeScript service layer — plug straight into automation.',
-    trust3Title: 'Zero-config setup',
-    trust3Desc: 'fl s configures yt-dlp/ffmpeg automatically. No system package manager touched.',
-    cliTitle: 'CLI — flow without a window',
-    cliNote: 'Machine-friendly output for AI agents, CI, and batch jobs',
-    cliHint: '--json emits the final object to stdout · --progress-json streams NDJSON to stderr · multi-file jobs always create a dedicated subfolder',
-    previewTitle: 'Try it — landing preview',
-    previewHint: 'Paste a URL and press Enter',
-    previewEmpty: 'Paste a URL above and press Enter — it stacks just like the MainDownloader cards in the real app.',
-    previewQueued: 'Queued · will resolve via yt-dlp in app',
-    bottomTitle: 'Video flows. Captions compound.',
-    bottomDesc: 'Stop switching tools. Capture once, collect clean Markdown — Flucto owns the last transform from collection to archive.',
-    bottomCtaA: 'Download free',
-    bottomCtaB: 'Star on GitHub',
+    personaC: '<b>Curators</b> — channels & playlists into topic-based Markdown archives',
+    bottomTitleA: 'Video flows.',
+    bottomTitleSerif: 'Captions compound.',
+    bottomTitleB: '',
+    bottomDesc: 'Stop switching tools. Capture once, keep clean Markdown — Flucto owns the last transform from collection to archive.',
+    bottomCtaA: 'Start free',
+    footerRights: 'Independent project · MIT License',
+    footerVersion: 'Latest stable',
   },
 }
+
+export const marqueePlatforms = ['YouTube', 'X', 'Reddit', 'Bilibili', 'Instagram', 'Threads', 'TikTok', 'Vimeo', platforms]
