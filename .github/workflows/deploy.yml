@@ -56,27 +56,12 @@ jobs:
             sudo chmod -R 755 /var/www/flucto.ponslink.com
             # Reload nginx so workers re-open the new files. Without this,
             # worker open-file-descriptors keep serving the prior dist's
-            # index.html even after scp + wipe. Try several paths in order,
-            # echoing which one actually worked:
-            #   1. sudo nginx -s reload   (most common)
-            #   2. nginx -s reload         (no sudo, if user is in nginx group)
-            #   3. sudo systemctl reload nginx
-            #   4. SIGHUP the master pid   (works whenever sudo can read the pid file)
-            RELOAD_DONE=0
-            if sudo nginx -s reload 2>/dev/null; then
-              echo 'reload: sudo nginx -s reload ok'; RELOAD_DONE=1
-            elif nginx -s reload 2>/dev/null; then
-              echo 'reload: nginx -s reload (no sudo) ok'; RELOAD_DONE=1
-            elif sudo systemctl reload nginx 2>/dev/null; then
-              echo 'reload: sudo systemctl reload nginx ok'; RELOAD_DONE=1
-            fi
-            if [ "$RELOAD_DONE" = "0" ]; then
-              NGX_PID=$(sudo cat /var/run/nginx.pid 2>/dev/null || sudo cat /run/nginx.pid 2>/dev/null || echo '')
-              if [ -n "$NGX_PID" ] && sudo kill -HUP "$NGX_PID" 2>/dev/null; then
-                echo "reload: kill -HUP $NGX_PID ok"; RELOAD_DONE=1
-              fi
-            fi
-            if [ "$RELOAD_DONE" = "0" ]; then
+            # index.html even after scp + wipe. Use `sudo -n` (non-interactive)
+            # so a missing sudoers rule fails fast instead of hanging the job
+            # on a password prompt.
+            if sudo -n nginx -s reload 2>/dev/null; then
+              echo 'reload: sudo nginx -s reload ok'
+            else
               echo 'reload: FAILED — workers may serve stale files until cache TTL'
             fi
             echo '---deployed---'
