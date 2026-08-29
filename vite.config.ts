@@ -21,9 +21,9 @@ export default defineConfig({
   ssgOptions: {
     mock: true,
     formatting: 'none',
-    // `flat` so /ko/docs → dist/ko/docs.html (no directory → no SPA-fallback
-    // collision; the static file is matched directly without trailing-slash
-    // redirect).
-    dirStyle: 'flat',
+    // `nested` so /ko → dist/ko/index.html and /ko/docs → dist/ko/docs/index.html.
+    // nginx's `try_files $uri $uri/` matches directories and serves their
+    // index.html directly, so each prerendered page is addressable.
+    dirStyle: 'nested',
   },
 })
