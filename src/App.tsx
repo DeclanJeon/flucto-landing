@@ -4,7 +4,8 @@ import {
   ArrowDown, ArrowRight, Boxes, Check, Copy, Download, FileText, FolderOpen,
   Globe, Languages, Play, ShieldCheck, Sparkles, Star, Terminal, Zap, Layers, BookOpen,
 } from 'lucide-react'
-import { defaultLang, dict, marqueePlatforms, type Lang } from './i18n'
+import { Head } from 'vite-react-ssg'
+import { defaultLang, dict, detectLang, marqueePlatforms, type Lang } from './i18n'
 import { DocsPage } from './docs'
 import { animateCount, fetchGitHubStats, formatCompact, type GitHubStats } from './github'
 
@@ -60,12 +61,35 @@ const Stat = ({ value, label, suffix = '' }: { value: number | string | null; la
   )
 }
 
-const routeFromHash = (): 'home' | 'docs' =>
-  typeof window !== 'undefined' && window.location.hash.startsWith('#/docs') ? 'docs' : 'home'
+const routeFromPath = (pathname: string): 'home' | 'docs' =>
+  pathname.replace(/\/+$/, '') === '/docs' || pathname.replace(/\/+$/, '').endsWith('/docs')
+    ? 'docs'
+    : 'home'
 
-export default function App() {
-  const [lang, setLang] = useState<Lang>(defaultLang)
-  const [route, setRoute] = useState<'home' | 'docs'>(routeFromHash)
+const navigate = (path: string) => {
+  if (typeof window === 'undefined') return
+  if (window.location.pathname + window.location.search === path) return
+  window.history.pushState({}, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
+export default function App({
+  initialRoute,
+  initialLang,
+}: {
+  initialRoute?: 'home' | 'docs'
+  initialLang?: Lang
+}) {
+  const [lang, setLang] = useState<Lang>(() => {
+    if (initialLang) return initialLang
+    if (typeof window !== 'undefined') return detectLang()
+    return defaultLang
+  })
+  const [route, setRoute] = useState<'home' | 'docs'>(() => {
+    if (initialRoute) return initialRoute
+    if (typeof window !== 'undefined') return routeFromPath(window.location.pathname)
+    return 'home'
+  })
   const t = dict[lang]
   const [copied, setCopied] = useState<string | null>(null)
   const [version, setVersion] = useState<string | null>(null)
@@ -73,12 +97,21 @@ export default function App() {
   const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const onHashChange = () => {
-      setRoute(routeFromHash())
+    const onPop = () => {
+      setRoute(routeFromPath(window.location.pathname))
       window.scrollTo({ top: 0, behavior: 'instant' })
     }
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  useEffect(() => {
+    const onLang = (e: Event) => {
+      const next = (e as CustomEvent<Lang>).detail
+      if (next === 'ko' || next === 'en') setLang(next)
+    }
+    window.addEventListener('flucto:set-lang', onLang as EventListener)
+    return () => window.removeEventListener('flucto:set-lang', onLang as EventListener)
   }, [])
 
   useEffect(() => {
@@ -94,6 +127,23 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
+
+  // SEO: per-route, per-language title/description. Updates on the client when the
+  // user toggles language; at build time <Head> below renders language-correct meta
+  // into each prerendered HTML shell.
+  const homeTitle = lang === 'ko' ? 'Flucto — 링크는 썩어도, 기록은 남는다.' : 'Flucto — Links rot. Archives don\'t.'
+  const docsTitle = lang === 'ko' ? '문서 — Flucto' : 'Docs — Flucto'
+  const pageTitle = route === 'docs' ? docsTitle : homeTitle
+  const pageDescription = route === 'docs'
+    ? (lang === 'ko'
+        ? 'Flucto CLI & 데스크탑 레퍼런스 — 명령어, 플래그, 네트워크 옵션, AI 에이전트 연동.'
+        : 'Flucto CLI & desktop reference — commands, flags, network options, and AI-agent integration.')
+    : t.heroLead
+  const pageUrl = (() => {
+    const base = 'https://flucto.ponslink.com'
+    if (route === 'docs') return lang === 'ko' ? `${base}/ko/docs` : `${base}/docs`
+    return lang === 'ko' ? `${base}/ko` : base
+  })()
 
   useEffect(() => {
     fetch('/version.json')
@@ -127,11 +177,35 @@ export default function App() {
   ]
 
   if (route === 'docs') {
-    return <DocsPage lang={lang} />
+    return (
+      <>
+        <Head>
+          <html lang={lang} />
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:type" content="website" />
+          <link rel="canonical" href={pageUrl} />
+        </Head>
+        <DocsPage lang={lang} />
+      </>
+    )
   }
 
   return (
     <div className="relative min-h-screen bg-[#04060c] text-[#eef2ff]">
+      <Head>
+        <html lang={lang} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href={pageUrl} />
+      </Head>
       <div className="grain" />
 
       {/* ---------- nav ---------- */}
@@ -146,13 +220,29 @@ export default function App() {
           </a>
           <div className="flex items-center gap-2">
             <a
-              href="#/docs"
+              href={lang === 'ko' ? '/ko/docs' : '/docs'}
+              onClick={(e) => {
+                e.preventDefault()
+                navigate(lang === 'ko' ? '/ko/docs' : '/docs')
+              }}
               className="hidden rounded-full px-3 py-1.5 text-sm text-white/60 transition hover:text-white sm:inline-flex"
             >
               Docs
             </a>
             <button
-              onClick={() => setLang((l) => (l === 'ko' ? 'en' : 'ko'))}
+              onClick={() => {
+                const next: Lang = lang === 'ko' ? 'en' : 'ko'
+                setLang(next)
+                // Sync URL prefix to the new language (e.g. / → /ko, /docs → /ko/docs)
+                const here = window.location.pathname
+                if (next === 'ko') {
+                  if (here === '/') navigate('/ko')
+                  else if (here === '/docs') navigate('/ko/docs')
+                } else {
+                  if (here === '/ko') navigate('/')
+                  else if (here === '/ko/docs') navigate('/docs')
+                }
+              }}
               className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
               title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
             >
