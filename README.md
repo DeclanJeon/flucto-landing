@@ -37,7 +37,15 @@ Client-side navigation between routes uses `pushState` (no more `#/docs` hash); 
 
 UI strings live in `src/i18n.ts` (`dict.ko` / `dict.en`). The SSG entry point passes the route's language to `<App>` as a prop, so each prerendered HTML already contains the correct `<html lang>`, `<title>`, `<meta name="description">`, `<link rel="canonical">`, and `og:title` / `og:description` / `og:url` for its audience — no client-side meta swap needed.
 
-On the client, the language toggle in the header stays visible for QA / manual override; the canonical URL is updated when toggling.
+On the client, the KO/EN toggle is **hidden by default**. Append `?i18n=1` to the URL (e.g. `https://flucto.ponslink.com/?i18n=1`) to reveal it for QA / manual language override. Because the query string only exists on the client, the prerendered HTML always ships without the toggle.
+
+## postbuild step
+
+`scripts/postbuild.mjs` runs after the SSG build and does three things:
+
+1. **Stylesheet injection** — vite-react-ssg only references the CSS bundle from the JS, not from the prerendered HTML. Injecting `<link rel="stylesheet" href="/assets/src-*.css">` into every HTML means the *first paint* is the styled page (no unstyled "skeleton" flash while the JS loads).
+2. **Build stamp** — every HTML gets a `<!-- build-stamp: <ISO timestamp> -->` comment, unique per build. `curl -s https://flucto.ponslink.com/ | grep build-stamp` tells you exactly which build is live.
+3. **Flat mirrors** — `dist/ko/index.html` → `dist/ko.html`, etc. (see Routes above).
 
 ## Deployment
 
@@ -45,10 +53,10 @@ Pushing to `main` triggers `.github/workflows/deploy.yml`:
 
 1. Bake the latest Flucto release tag into `public/version.json`.
 2. `npm run build` → `dist/` (4 nested HTMLs + 3 flat mirrors, plus hashed JS/CSS in `dist/assets/`).
-3. SSH to the ponslink host, take ownership, wipe the previous dist, `scp` the new one, restore `www-data` ownership, and `sudo nginx -s reload` so workers re-open the new files (the reload is what clears the open-fd cache that was keeping the old `index.html` alive across deploys).
+3. SSH to the ponslink host, take ownership, wipe the previous dist, `scp` the new one, `touch` every file (fresh mtime — defeats nginx's `open_file_cache`, which can keep serving the old deploy's bytes even after a reload), restore `www-data` ownership, and `sudo -n nginx -s reload`.
 4. Footer fetches `/version.json` at runtime and displays `v{version}`.
 
-The flat `dist/ko.html` mirror is what makes `/ko` work without a trailing-slash redirect from nginx.
+All sudo calls use `-n` (non-interactive) and all ssh calls use `-n` so a missing sudoers rule fails fast instead of hanging the job.
 
 ## Notes
 

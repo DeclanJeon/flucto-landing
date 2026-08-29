@@ -10,26 +10,6 @@ export const detectLang = (): Lang => {
   return defaultLang
 }
 
-export type Route = 'home' | 'docs'
-
-/** Resolve initial route from current URL pathname (works for SSR + client). */
-export const getInitialRoute = (pathname: string): Route => {
-  const p = pathname.replace(/\/+$/, '') || '/'
-  return p === '/docs' ? 'docs' : 'home'
-}
-
-/** Map pathname → lang for SSG. `/ko/*` → ko, everything else → en. */
-export const getLangFromPath = (pathname: string): Lang => {
-  const p = pathname.replace(/\/+$/, '') || '/'
-  return p === '/ko' || p.startsWith('/ko/') ? 'ko' : 'en'
-}
-
-/** Map route+lang → static pathname. */
-export const getPath = (route: Route, lang: Lang): string => {
-  if (route === 'docs') return lang === 'ko' ? '/ko/docs' : '/docs'
-  return lang === 'ko' ? '/ko' : '/'
-}
-
 type Dict = {
   navTag: string
   heroKicker: string
