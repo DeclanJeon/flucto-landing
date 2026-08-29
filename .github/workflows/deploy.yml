@@ -37,43 +37,29 @@ jobs:
 
       - run: npm run build
 
-      - name: Inspect local dist before deploy
-        run: |
-          echo "=== local dist tree ==="
-          find dist -maxdepth 3 -type f | sort
-          echo "=== local dist/index.html (head) ==="
-          head -c 400 dist/index.html
-          echo
-          echo "=== local dist/ko/index.html (head) ==="
-          head -c 400 dist/ko/index.html
-
       - name: Deploy to ponslink
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
           # Ensure target is writable, then wipe the previous build's contents
           # so flat/nested leftovers from prior deploys don't shadow the new
           # dist tree (a stale dist/ko.html would mask dist/ko/index.html).
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo rm -rf /var/www/flucto.ponslink.com/*"
+
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
-          ssh -i ~/.ssh_deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
             sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
             sudo chmod -R 755 /var/www/flucto.ponslink.com
-            # Dump the nginx server block for flucto.ponslink.com into our
-            # dist so it can be fetched over HTTP for diagnosis. Try a
-            # sequence of locations and commands to handle different
-            # nginx distros / permissions.
-            {
-              sudo grep -B 2 -A 30 'flucto' /etc/nginx/sites-enabled/* 2>/dev/null;
-              sudo grep -B 2 -A 30 'flucto' /etc/nginx/conf.d/* 2>/dev/null;
-              sudo nginx -T 2>/dev/null | awk '/server[[:space:]]*\\{[^}]*flucto/,/^[[:space:]]*\\}[[:space:]]*$/';
-            } > /var/www/flucto.ponslink.com/__nginx.conf.txt 2>/dev/null
-            sudo chmod 644 /var/www/flucto.ponslink.com/__nginx.conf.txt
-            # Reload nginx so worker processes pick up the new files
-            # (open file descriptors from prior deploys were caching
-            # the previous dist's index.html).
+            # Reload nginx so workers re-open the new files. Without this,
+            # worker open-file-descriptors keep serving the prior dist's
+            # index.html even after scp + wipe — a stale fd cache that
+            # only a reload can clear.
             sudo nginx -s reload 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || true
+            echo '---deployed---'
             cat /var/www/flucto.ponslink.com/version.json
+            curl -sL https://flucto.ponslink.com/version.json | head -n 5
           "
