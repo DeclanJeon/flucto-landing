@@ -380,7 +380,7 @@ export default function App() {
                 n: '1',
                 title: t.cliGuideStep1Title,
                 note: t.cliGuideStep1Note,
-                cmd: 'git clone https://github.com/DeclanJeon/flucto && cd flucto && npm install && npm run build:electron && npm link',
+                cmd: 'npm i -g flucto',
                 key: 'cli-install',
               },
               {
@@ -418,7 +418,7 @@ export default function App() {
               </div>
             ))}
             <p className="pill inline-flex bg-white/[.03] px-3 py-1.5 font-mono text-[11px] text-white/35">
-              {t.cliGuideNpmSoon}
+              {t.cliGuideSourceAlt}
             </p>
           </div>
 

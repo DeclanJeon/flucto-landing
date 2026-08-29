@@ -60,7 +60,7 @@ type Dict = {
   cliGuideStep2Note: string
   cliGuideStep3Title: string
   cliGuideStep3Note: string
-  cliGuideNpmSoon: string
+  cliGuideSourceAlt: string
   agentTitle: string
   agentDesc: string
   agentPrompt: string
@@ -135,16 +135,16 @@ export const dict: Record<Lang, Dict> = {
     cliGuideTitle: '앱 없이, CLI만 설치해서 쓴다',
     cliGuideSub: '데스크톱 앱 없이 fl 한 줄이면 충분하다. Node.js 20+면 끝.',
     cliGuideStep1Title: '설치',
-    cliGuideStep1Note: '저장소 클론 → 빌드 → 전역 명령 등록 (1분)',
+    cliGuideStep1Note: 'npm에서 전역 설치 (수 초)',
     cliGuideStep2Title: '점검',
     cliGuideStep2Note: 'yt-dlp 자동 구성 — 자막 작업만 할 거면 ffmpeg는 생략 가능',
     cliGuideStep3Title: '실행',
     cliGuideStep3Note: '자막 → Markdown. --json은 stdout, 진행률은 stderr',
-    cliGuideNpmSoon: 'npm i -g flucto — 곧 공개',
+    cliGuideSourceAlt: '소스 선호? git clone … && npm link',
     agentTitle: 'AI 에이전트에게 그냥 시켜라',
     agentDesc: 'Claude Code, Codex, Cursor에 이 프롬프트를 붙여넣어라. 머신 친화 출력(--json / --progress-json)이라 에이전트가 그대로 파싱한다.',
-    agentPrompt: 'Flucto CLI(fl)를 설치하고, 이 채널의 최근 영상 자막을 타임스탬프가 있는 Markdown 노트로 ./notes 폴더에 정리해줘: https://www.youtube.com/@handle',
-    agentHint: '에이전트가 git clone부터 정리까지 알아서 한다 — 사람은 결과만 읽는다',
+    agentPrompt: 'npm으로 Flucto CLI(fl)를 설치하고, 이 채널의 최근 영상 자막을 타임스탬프가 있는 Markdown 노트로 ./notes 폴더에 정리해줘: https://www.youtube.com/@handle',
+    agentHint: '에이전트가 설치부터 정리까지 알아서 한다 — 사람은 결과만 읽는다',
     personaKicker: 'WHO IT IS FOR',
     personaTitle: '기록이 자산인 사람들',
     personaA: '<b>크리에이터</b> — 숏폼·릴스 소스를 보관하고 재편집 레퍼런스로',
@@ -211,16 +211,16 @@ export const dict: Record<Lang, Dict> = {
     cliGuideTitle: 'No app. Just the CLI.',
     cliGuideSub: 'One fl command is enough — no desktop app required. Node.js 20+ and you are done.',
     cliGuideStep1Title: 'Install',
-    cliGuideStep1Note: 'Clone, build, register the global command (one minute)',
+    cliGuideStep1Note: 'One global npm install (seconds)',
     cliGuideStep2Title: 'Verify',
     cliGuideStep2Note: 'yt-dlp is provisioned automatically — skip ffmpeg if you only transcribe',
     cliGuideStep3Title: 'Run',
     cliGuideStep3Note: 'Captions → Markdown. --json on stdout, progress on stderr',
-    cliGuideNpmSoon: 'npm i -g flucto — shipping soon',
+    cliGuideSourceAlt: 'Prefer source? git clone … && npm link',
     agentTitle: 'Just tell your AI agent.',
     agentDesc: 'Paste this prompt into Claude Code, Codex, or Cursor. Machine-friendly output (--json / --progress-json) parses as-is.',
-    agentPrompt: 'Install the Flucto CLI (fl), then turn this channel\'s recent captions into timestamped Markdown notes in ./notes: https://www.youtube.com/@handle',
-    agentHint: 'The agent handles everything from git clone to the final notes — you just read the result',
+    agentPrompt: 'Install the Flucto CLI (fl) via npm, then turn this channel\'s recent captions into timestamped Markdown notes in ./notes: https://www.youtube.com/@handle',
+    agentHint: 'The agent handles everything from install to the final notes — you just read the result',
     personaKicker: 'WHO IT IS FOR',
     personaTitle: 'People whose records are assets',
     personaA: '<b>Creators</b> — archive Shorts/Reels sources as re-edit references',
