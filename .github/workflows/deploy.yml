@@ -59,19 +59,22 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo rm -rf /var/www/flucto.ponslink.com/*"
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-            echo '=== remote dist tree ==='
+            echo '=== remote dist tree (after scp) ==='
             sudo find /var/www/flucto.ponslink.com -maxdepth 3 -type f | sort
-            echo '=== remote index.html (head) ==='
-            head -c 400 /var/www/flucto.ponslink.com/index.html
-            echo
-            echo '=== remote ko/index.html (head) ==='
-            head -c 400 /var/www/flucto.ponslink.com/ko/index.html
+            echo '=== remote index.html md5 ==='
+            md5sum /var/www/flucto.ponslink.com/index.html 2>/dev/null
+            echo '=== remote ko/index.html md5 ==='
+            md5sum /var/www/flucto.ponslink.com/ko/index.html 2>/dev/null
+            echo '=== remote ko.html md5 ==='
+            md5sum /var/www/flucto.ponslink.com/ko.html 2>/dev/null
+            echo '=== remote ko/docs.html md5 ==='
+            md5sum /var/www/flucto.ponslink.com/ko/docs.html 2>/dev/null
+            echo '=== remote index.html head ==='
+            head -c 250 /var/www/flucto.ponslink.com/index.html
             echo
             echo '=== chown/chmod ==='
             sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
             sudo chmod -R 755 /var/www/flucto.ponslink.com
             echo '=== version.json ==='
             cat /var/www/flucto.ponslink.com/version.json
-            echo '---deployed---'
-            curl -sL https://flucto.ponslink.com/version.json | head -n 5
           "
