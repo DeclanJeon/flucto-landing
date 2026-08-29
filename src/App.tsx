@@ -85,6 +85,17 @@ export default function App({
     if (typeof window !== 'undefined') return detectLang()
     return defaultLang
   })
+  // The KO/EN toggle is hidden in production. Append `?i18n=1` to reveal it
+  // (handy for QA / debugging without polluting the public UI). Because the
+  // query string only exists on the client, the prerendered HTML always ships
+  // without the toggle. Lazy init reads the URL once on the first client
+  // render — matches the server-rendered output when `?i18n=1` is absent
+  // (no hydration mismatch in production), and reveals the toggle in one
+  // render when the query string opts in.
+  const [showToggle] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return new URLSearchParams(window.location.search).get('i18n') === '1'
+  })
   const [route, setRoute] = useState<'home' | 'docs'>(() => {
     if (initialRoute) return initialRoute
     if (typeof window !== 'undefined') return routeFromPath(window.location.pathname)
@@ -229,25 +240,27 @@ export default function App({
             >
               Docs
             </a>
-            <button
-              onClick={() => {
-                const next: Lang = lang === 'ko' ? 'en' : 'ko'
-                setLang(next)
-                // Sync URL prefix to the new language (e.g. / → /ko, /docs → /ko/docs)
-                const here = window.location.pathname
-                if (next === 'ko') {
-                  if (here === '/') navigate('/ko')
-                  else if (here === '/docs') navigate('/ko/docs')
-                } else {
-                  if (here === '/ko') navigate('/')
-                  else if (here === '/ko/docs') navigate('/docs')
-                }
-              }}
-              className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
-              title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
-            >
-              <Languages size={12} /> {lang === 'ko' ? 'EN' : 'KO'}
-            </button>
+            {showToggle && (
+              <button
+                onClick={() => {
+                  const next: Lang = lang === 'ko' ? 'en' : 'ko'
+                  setLang(next)
+                  // Sync URL prefix to the new language (e.g. / → /ko, /docs → /ko/docs)
+                  const here = window.location.pathname
+                  if (next === 'ko') {
+                    if (here === '/') navigate('/ko')
+                    else if (here === '/docs') navigate('/ko/docs')
+                  } else {
+                    if (here === '/ko') navigate('/')
+                    else if (here === '/ko/docs') navigate('/docs')
+                  }
+                }}
+                className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
+                title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
+              >
+                <Languages size={12} /> {lang === 'ko' ? 'EN' : 'KO'}
+              </button>
+            )}
             <a
               href={REPO_URL}
               target="_blank"
