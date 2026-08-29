@@ -47,19 +47,20 @@ jobs:
           # Ensure target is writable, then wipe the previous build's contents
           # so flat/nested leftovers from prior deploys don't shadow the new
           # dist tree (a stale dist/ko.html would mask dist/ko/index.html).
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo rm -rf /var/www/flucto.ponslink.com/*"
+          # All sudo calls use `-n` (non-interactive) so a missing sudoers rule
+          # fails fast instead of hanging the job on a password prompt.
+          ssh -n -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo -n chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo -n rm -rf /var/www/flucto.ponslink.com/*"
 
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-            sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
-            sudo chmod -R 755 /var/www/flucto.ponslink.com
+          ssh -n -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+            sudo -n chown -R www-data:www-data /var/www/flucto.ponslink.com
+            sudo -n chmod -R 755 /var/www/flucto.ponslink.com
             # Reload nginx so workers re-open the new files. Without this,
             # worker open-file-descriptors keep serving the prior dist's
-            # index.html even after scp + wipe. Use `sudo -n` (non-interactive)
-            # so a missing sudoers rule fails fast instead of hanging the job
-            # on a password prompt.
-            if sudo -n nginx -s reload 2>/dev/null; then
+            # index.html even after scp + wipe. `sudo -n` fails fast on
+            # permission errors instead of hanging the job.
+            if sudo -n nginx -s reload < /dev/null 2>/dev/null; then
               echo 'reload: sudo nginx -s reload ok'
             else
               echo 'reload: FAILED — workers may serve stale files until cache TTL'
