@@ -39,8 +39,9 @@ git push              # → CI auto-deploys to flucto.ponslink.com
 
 ## Gotchas
 - **`NODE_ENV=production` is exported in the local shell** — plain `npm install` / `npm ci` silently skips devDependencies (vite, tailwind, typescript...) and the build fails with confusing ENOENT errors. Always prefix with `NODE_ENV=development`.
-- **nginx fd-cache on the host** is aggressive: after `scp`, workers can keep serving the previous deploy's `index.html` even after `nginx -s reload`. The build-stamp + `touch` combination in the deploy step handles this; if `/` ever serves stale bytes again, check that both still run in CI.
-- Live sanity check: `curl -sL https://flucto.ponslink.com/ | grep build-stamp` and `/version.json`'s `builtAt` should both be from the latest deploy.
+- **Cloudflare caches the HTML** (cache-everything rule on the zone): after a deploy, `https://flucto.ponslink.com/` can keep serving the previous build with `cf-cache-status: HIT` even though the origin is already updated. Fix = the "Purge Cloudflare cache" step in deploy.yml, which needs `CF_ZONE_ID` + `CF_API_TOKEN` (Zone.Cache Purge permission) repo secrets. Until those are added, verify deploys with a cache-buster: `curl -s 'https://flucto.ponslink.com/?nocache=$(date +%s)' | grep build-stamp` — or purge manually from the CF dashboard.
+- **nginx on the origin** was also observed serving stale fds after scp in one deploy; the deploy step already defends (wipe before scp, `touch` after scp, `sudo -n nginx -s reload`).
+- Live sanity check: `curl -s 'https://flucto.ponslink.com/?nocache=1' | grep build-stamp` and `/version.json`'s `builtAt` should both be from the latest deploy.
 - If the host's nginx config ever gains `try_files ... $uri.html`, the flat mirrors in `dist/` are already in place.
 
 ## Not done / possible next
