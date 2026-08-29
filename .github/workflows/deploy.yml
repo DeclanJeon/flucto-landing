@@ -57,8 +57,19 @@ jobs:
             # Reload nginx so workers re-open the new files. Without this,
             # worker open-file-descriptors keep serving the prior dist's
             # index.html even after scp + wipe — a stale fd cache that
-            # only a reload can clear.
-            sudo nginx -s reload 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || true
+            # only a reload can clear. Try sudo first, then the user's
+            # own reload (in case they're in the nginx group), and echo
+            # the outcome so the next failing run can tell which path
+            # worked.
+            if sudo nginx -s reload 2>/dev/null; then
+              echo 'reload: sudo nginx -s reload ok'
+            elif nginx -s reload 2>/dev/null; then
+              echo 'reload: nginx -s reload (no sudo) ok'
+            elif sudo systemctl reload nginx 2>/dev/null; then
+              echo 'reload: sudo systemctl reload nginx ok'
+            else
+              echo 'reload: FAILED — worker fds may serve stale files'
+            fi
             echo '---deployed---'
             cat /var/www/flucto.ponslink.com/version.json
             curl -sL https://flucto.ponslink.com/version.json | head -n 5
