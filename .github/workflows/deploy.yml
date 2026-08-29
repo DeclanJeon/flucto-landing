@@ -53,6 +53,14 @@ jobs:
 
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
 
+          # scp -p is not always available, and the default scp
+          # preserves mtimes — so the new files can land with the
+          # previous build's mtime. nginx's open_file_cache (when
+          # enabled) keys on (dev, inode, mtime, size) and treats
+          # the file as still cached. Force a fresh mtime so the
+          # next read evicts the stale fd.
+          ssh -n -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "find /var/www/flucto.ponslink.com -type f -exec touch {} +"
+
           ssh -n -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
             sudo -n chown -R www-data:www-data /var/www/flucto.ponslink.com
             sudo -n chmod -R 755 /var/www/flucto.ponslink.com
