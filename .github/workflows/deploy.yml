@@ -63,18 +63,14 @@ jobs:
             sudo find /var/www/flucto.ponslink.com -maxdepth 3 -type f | sort
             echo '=== remote index.html md5 ==='
             md5sum /var/www/flucto.ponslink.com/index.html 2>/dev/null
-            echo '=== remote ko/index.html md5 ==='
-            md5sum /var/www/flucto.ponslink.com/ko/index.html 2>/dev/null
-            echo '=== remote ko.html md5 ==='
-            md5sum /var/www/flucto.ponslink.com/ko.html 2>/dev/null
-            echo '=== remote ko/docs.html md5 ==='
-            md5sum /var/www/flucto.ponslink.com/ko/docs.html 2>/dev/null
             echo '=== remote index.html head ==='
             head -c 250 /var/www/flucto.ponslink.com/index.html
             echo
             echo '=== chown/chmod ==='
             sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
             sudo chmod -R 755 /var/www/flucto.ponslink.com
-            echo '=== version.json ==='
+            echo '=== nginx config (flucto.ponslink.com) ==='
+            sudo grep -A 30 'flucto' /etc/nginx/sites-enabled/* 2>/dev/null || sudo nginx -T 2>/dev/null | grep -B 2 -A 20 'flucto'
+            echo '---deployed---'
             cat /var/www/flucto.ponslink.com/version.json
           "
