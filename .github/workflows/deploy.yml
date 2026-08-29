@@ -56,19 +56,28 @@ jobs:
             sudo chmod -R 755 /var/www/flucto.ponslink.com
             # Reload nginx so workers re-open the new files. Without this,
             # worker open-file-descriptors keep serving the prior dist's
-            # index.html even after scp + wipe — a stale fd cache that
-            # only a reload can clear. Try sudo first, then the user's
-            # own reload (in case they're in the nginx group), and echo
-            # the outcome so the next failing run can tell which path
-            # worked.
+            # index.html even after scp + wipe. Try several paths in order,
+            # echoing which one actually worked:
+            #   1. sudo nginx -s reload   (most common)
+            #   2. nginx -s reload         (no sudo, if user is in nginx group)
+            #   3. sudo systemctl reload nginx
+            #   4. SIGHUP the master pid   (works whenever sudo can read the pid file)
+            RELOAD_DONE=0
             if sudo nginx -s reload 2>/dev/null; then
-              echo 'reload: sudo nginx -s reload ok'
+              echo 'reload: sudo nginx -s reload ok'; RELOAD_DONE=1
             elif nginx -s reload 2>/dev/null; then
-              echo 'reload: nginx -s reload (no sudo) ok'
+              echo 'reload: nginx -s reload (no sudo) ok'; RELOAD_DONE=1
             elif sudo systemctl reload nginx 2>/dev/null; then
-              echo 'reload: sudo systemctl reload nginx ok'
-            else
-              echo 'reload: FAILED — worker fds may serve stale files'
+              echo 'reload: sudo systemctl reload nginx ok'; RELOAD_DONE=1
+            fi
+            if [ "$RELOAD_DONE" = "0" ]; then
+              NGX_PID=$(sudo cat /var/run/nginx.pid 2>/dev/null || sudo cat /run/nginx.pid 2>/dev/null || echo '')
+              if [ -n "$NGX_PID" ] && sudo kill -HUP "$NGX_PID" 2>/dev/null; then
+                echo "reload: kill -HUP $NGX_PID ok"; RELOAD_DONE=1
+              fi
+            fi
+            if [ "$RELOAD_DONE" = "0" ]; then
+              echo 'reload: FAILED — workers may serve stale files until cache TTL'
             fi
             echo '---deployed---'
             cat /var/www/flucto.ponslink.com/version.json
