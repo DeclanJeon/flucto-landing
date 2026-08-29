@@ -109,6 +109,7 @@ body{
   -webkit-mask-composite:xor;mask-composite:exclude;
 }
 .kbd{font:12px var(--mono);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;padding:2px 7px;color:rgba(238,242,255,.75)}
+.inline-code{font-family:var(--mono);font-size:.85em;background:rgba(62,224,255,.08);border:1px solid rgba(62,224,255,.15);border-radius:6px;padding:1px 5px;color:#7deaff}
 .pill{border:1px solid var(--line);border-radius:999px}
 
 /* ---------- marquee ---------- */

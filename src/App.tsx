@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import {
   ArrowDown, ArrowRight, Boxes, Check, Copy, Download, FileText, FolderOpen,
   Globe, Languages, Play, ShieldCheck, Sparkles, Star, Terminal, Zap, Layers, BookOpen,
 } from 'lucide-react'
 import { defaultLang, dict, marqueePlatforms, type Lang } from './i18n'
+import { DocsPage } from './docs'
 import { animateCount, fetchGitHubStats, formatCompact, type GitHubStats } from './github'
 
 const REPO_URL = 'https://github.com/DeclanJeon/flucto'
@@ -59,13 +60,32 @@ const Stat = ({ value, label, suffix = '' }: { value: number | string | null; la
   )
 }
 
+const routeFromHash = (): 'home' | 'docs' =>
+  typeof window !== 'undefined' && window.location.hash.startsWith('#/docs') ? 'docs' : 'home'
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(defaultLang)
+  const [route, setRoute] = useState<'home' | 'docs'>(routeFromHash)
   const t = dict[lang]
   const [copied, setCopied] = useState<string | null>(null)
   const [version, setVersion] = useState<string | null>(null)
   const [stats, setStats] = useState<GitHubStats | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setRoute(routeFromHash())
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  useEffect(() => {
+    const onToggleLang = () => setLang((l) => (l === 'ko' ? 'en' : 'ko'))
+    window.addEventListener('flucto:toggle-lang', onToggleLang)
+    return () => window.removeEventListener('flucto:toggle-lang', onToggleLang)
+  }, [])
 
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 120])
@@ -106,6 +126,10 @@ export default function App() {
     'fl b urls.txt -f md -c 2 -o ./notes -j',
   ]
 
+  if (route === 'docs') {
+    return <DocsPage lang={lang} />
+  }
+
   return (
     <div className="relative min-h-screen bg-[#04060c] text-[#eef2ff]">
       <div className="grain" />
@@ -121,6 +145,12 @@ export default function App() {
             </div>
           </a>
           <div className="flex items-center gap-2">
+            <a
+              href="#/docs"
+              className="hidden rounded-full px-3 py-1.5 text-sm text-white/60 transition hover:text-white sm:inline-flex"
+            >
+              Docs
+            </a>
             <button
               onClick={() => setLang((l) => (l === 'ko' ? 'en' : 'ko'))}
               className="pill inline-flex items-center gap-1 bg-white/5 px-2.5 py-1.5 text-xs text-white/60 hover:bg-white/10"
