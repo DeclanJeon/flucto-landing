@@ -59,18 +59,12 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo rm -rf /var/www/flucto.ponslink.com/*"
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-            echo '=== remote dist tree (after scp) ==='
-            sudo find /var/www/flucto.ponslink.com -maxdepth 3 -type f | sort
-            echo '=== remote index.html md5 ==='
-            md5sum /var/www/flucto.ponslink.com/index.html 2>/dev/null
-            echo '=== remote index.html head ==='
-            head -c 250 /var/www/flucto.ponslink.com/index.html
-            echo
-            echo '=== chown/chmod ==='
             sudo chown -R www-data:www-data /var/www/flucto.ponslink.com
             sudo chmod -R 755 /var/www/flucto.ponslink.com
-            echo '=== nginx config (flucto.ponslink.com) ==='
-            sudo grep -A 30 'flucto' /etc/nginx/sites-enabled/* 2>/dev/null || sudo nginx -T 2>/dev/null | grep -B 2 -A 20 'flucto'
-            echo '---deployed---'
+            # Dump the nginx server block for flucto.ponslink.com into our
+            # dist so it can be fetched over HTTP for diagnosis.
+            sudo grep -B 2 -A 30 'flucto' /etc/nginx/sites-enabled/* > /var/www/flucto.ponslink.com/__nginx.conf.txt 2>/dev/null || \
+              sudo nginx -T 2>/dev/null | awk '/server .*flucto/,/^[[:space:]]*}[[:space:]]*$/' > /var/www/flucto.ponslink.com/__nginx.conf.txt
+            sudo chmod 644 /var/www/flucto.ponslink.com/__nginx.conf.txt
             cat /var/www/flucto.ponslink.com/version.json
           "
