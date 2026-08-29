@@ -43,11 +43,9 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-          # Ensure target is writable
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com"
-          # Wipe the previous build's contents so flat/nested leftovers from
-          # prior deploys don't shadow the new dist tree (e.g. a stale
-          # dist/ko.html would mask the new dist/ko/index.html).
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "rm -rf /var/www/flucto.ponslink.com/*"
+          # Ensure target is writable, then wipe the previous build's contents
+          # so flat/nested leftovers from prior deploys don't shadow the new
+          # dist tree (a stale dist/ko.html would mask dist/ko/index.html).
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} /var/www/flucto.ponslink.com && sudo rm -rf /var/www/flucto.ponslink.com/*"
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/flucto.ponslink.com/
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "sudo chown -R www-data:www-data /var/www/flucto.ponslink.com && sudo chmod -R 755 /var/www/flucto.ponslink.com && cat /var/www/flucto.ponslink.com/version.json && echo '---deployed---' && curl -sL https://flucto.ponslink.com/version.json | head -n 5"
