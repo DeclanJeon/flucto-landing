@@ -37,6 +37,16 @@ jobs:
 
       - run: npm run build
 
+      - name: Inspect local dist before deploy
+        run: |
+          echo "=== local dist tree ==="
+          find dist -maxdepth 3 -type f | sort
+          echo "=== local dist/index.html (head) ==="
+          head -c 400 dist/index.html
+          echo
+          echo "=== local dist/ko/index.html (head) ==="
+          head -c 400 dist/ko/index.html
+
       - name: Deploy to ponslink
         run: |
           mkdir -p ~/.ssh
