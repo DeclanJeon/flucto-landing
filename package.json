@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite-react-ssg dev",
-    "build": "vite-react-ssg build",
+    "build": "vite-react-ssg build && node scripts/postbuild.mjs",
     "lint": "oxlint",
     "preview": "vite-react-ssg preview"
   },
