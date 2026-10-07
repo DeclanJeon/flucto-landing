@@ -1,6 +1,6 @@
 # Flucto Landing
 
-Marketing landing page for **Flucto** — a 100% TypeScript CLI that turns any video/audio/article URL into transcripts, clips, and Markdown notes.
+Marketing landing page for **Flucto** — a creator-first desktop app + `fl` CLI that collects reference media from 12 sites and turns available captions into timestamped Markdown notes, aimed at AI-video creators preparing production assets.
 
 - **Live:** https://flucto.ponslink.com
 - **Product repo:** https://github.com/DeclanJeon/flucto
@@ -18,14 +18,28 @@ npm run preview  # serve the build
 npm run lint
 ```
 
+## Demo media
+
+The homepage gallery (`#demos`) renders a fixed catalog of 12 clips defined in `src/demos.ts`. Each entry expects three files in `public/demos/`:
+
+```
+public/demos/<id>.mp4   # click-to-play video (native controls, never autoplays)
+public/demos/<id>.png   # poster frame (lazy-loaded still, shown until play)
+public/demos/<id>.gif   # downloadable fallback linked under each card
+```
+
+The 12 ids are `01-video-download` … `12-cli-setup-update` (see `src/demos.ts` for the full list). The same files are mirrored into the product repo under `assets/demo/features/<id>.<ext>` for README embeds.
+
+To update a clip: replace the three files in `public/demos/`, keep the id filename, and adjust the localized title/caption in `src/demos.ts` if the capture changed. Posters are referenced by `<img loading="lazy">` and videos only mount after a user click, so offscreen media is never fetched and nothing autoplays — including for `prefers-reduced-motion` users.
+
 ## Routes
 
 Four static pages are pre-rendered at build time and served as plain HTML, so every URL works without JavaScript and search engines can index each route directly:
 
 | Path        | Title                        | HTML shell                              |
 |-------------|------------------------------|------------------------------------------|
-| `/`         | Flucto — Links rot.          | `dist/index.html` (English home)         |
-| `/ko`       | Flucto — 링크는 썩어도, …    | `dist/ko/index.html` (Korean home)       |
+| `/`         | Flucto — Your references. Ready for production. | `dist/index.html` (English home)         |
+| `/ko`       | Flucto — 레퍼런스. 프로덕션 준비 완료. | `dist/ko/index.html` (Korean home)       |
 | `/docs`     | Docs — Flucto                | `dist/docs/index.html` (English docs)     |
 | `/ko/docs`  | 문서 — Flucto                | `dist/ko/docs/index.html` (Korean docs)  |
 

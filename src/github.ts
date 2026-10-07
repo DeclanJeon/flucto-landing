@@ -4,6 +4,14 @@ export interface GitHubStats {
   stars: number | null
   downloads: number | null
   latestVersion: string | null
+  /** Resolved browser_download_url per installer kind, null until fetched. */
+  assets: {
+    exe: string | null
+    dmg: string | null
+    appimage: string | null
+    cli: string | null
+    checksums: string | null
+  }
 }
 
 const RELEASES_URL = 'https://api.github.com/repos/DeclanJeon/flucto/releases?per_page=100'
@@ -25,7 +33,12 @@ const TTL_MS = 10 * 60 * 1000
 export async function fetchGitHubStats(): Promise<GitHubStats> {
   if (cache.data && Date.now() - cache.fetchedAt < TTL_MS) return cache.data
 
-  const stats: GitHubStats = { stars: null, downloads: null, latestVersion: null }
+  const stats: GitHubStats = {
+    stars: null,
+    downloads: null,
+    latestVersion: null,
+    assets: { exe: null, dmg: null, appimage: null, cli: null, checksums: null },
+  }
 
   const [repoResult, releasesResult] = await Promise.allSettled([
     fetch(REPO_URL, { headers }),
@@ -40,7 +53,9 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
   if (releasesResult.status === 'fulfilled' && releasesResult.value.ok) {
     const releases = (await releasesResult.value.json()) as Array<{
       tag_name?: string
-      assets?: Array<{ download_count?: number }>
+      draft?: boolean
+      prerelease?: boolean
+      assets?: Array<{ name?: string; download_count?: number; browser_download_url?: string }>
     }>
     if (Array.isArray(releases)) {
       let total = 0
@@ -49,9 +64,19 @@ export async function fetchGitHubStats(): Promise<GitHubStats> {
           if (typeof asset.download_count === 'number') total += asset.download_count
         }
       }
-      if (releases.length > 0) {
+      const latest = releases.find((r) => !r.draft && !r.prerelease && r.assets?.length)
+      if (latest) {
         stats.downloads = total
-        stats.latestVersion = releases[0]?.tag_name?.replace(/^v/, '') ?? null
+        stats.latestVersion = latest.tag_name?.replace(/^v/, '') ?? null
+        for (const asset of latest.assets ?? []) {
+          const name = asset.name ?? ''
+          const url = asset.browser_download_url ?? null
+          if (name.endsWith('-x64-setup.exe')) stats.assets.exe = url
+          else if (name.endsWith('-universal.dmg')) stats.assets.dmg = url
+          else if (name.endsWith('-x86_64.AppImage')) stats.assets.appimage = url
+          else if (name.endsWith('-cli-setup.zip')) stats.assets.cli = url
+          else if (name === 'checksums-sha256.txt') stats.assets.checksums = url
+        }
       }
     }
   }

@@ -1,4 +1,3 @@
-import React from 'react'
 import { ViteReactSSG } from 'vite-react-ssg'
 import App from './App.tsx'
 

@@ -28,7 +28,7 @@ jobs:
       - name: Bake version from flucto repo + local
         run: |
           FLUCTO_VER=$(gh api repos/DeclanJeon/flucto/releases/latest --jq .tag_name 2>/dev/null | sed 's/^v//')
-          if [ -z "$FLUCTO_VER" ]; then FLUCTO_VER="1.14.0"; fi
+          if [ -z "$FLUCTO_VER" ]; then FLUCTO_VER="1.18.0"; fi
           echo "Flucto latest: $FLUCTO_VER"
           echo "{\"version\":\"$FLUCTO_VER\",\"builtAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > public/version.json
           cat public/version.json
