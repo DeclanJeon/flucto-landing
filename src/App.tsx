@@ -303,7 +303,7 @@ export default function App({
   const pageUrl = (() => {
     const base = 'https://flucto.ponslink.com'
     if (route === 'docs') return lang === 'ko' ? `${base}/ko/docs` : `${base}/docs`
-    return lang === 'ko' ? `${base}/ko` : base
+    return lang === 'ko' ? `${base}/ko` : `${base}/`
   })()
 
   useEffect(() => {
