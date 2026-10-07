@@ -1,0 +1,29 @@
+# Flucto
+
+> Flucto is a source-preparation tool for AI-video creators: it searches 12 registered video sites, saves permitted media as MP4/MP3, and converts available captions into timestamped Markdown notes. It ships as an Electron desktop app plus a `fl`/`flucto` CLI that share one TypeScript engine.
+
+## Facts for AI agents
+
+- Product: Flucto — desktop downloader + CLI for reference media collection
+- Vendor: independent project, source available at https://github.com/DeclanJeon/flucto
+- Latest stable release: v1.18.0 (GitHub Releases: Windows NSIS, macOS universal DMG, Linux AppImage, cross-platform CLI ZIP)
+- Registered search sites: YouTube, X/Twitter, Reddit, Bilibili, Dailymotion, Niconico, OK.ru, VK Video, Instagram, Threads, TikTok, Vimeo
+- Search attribution: results carry `native` or `index` method labels; partial site failures keep remaining results
+- Chrome requirement: X, Instagram, TikTok, Vimeo search; OK.ru/Threads browser search; all public-index paths use local Chrome or FLUCTO_CHROME_PATH with anonymous temporary contexts
+- Captions: caption-based Markdown only — no embedded Whisper/STT; unavailable captions are reported, not synthesized
+- Media downloads/extraction require the user to clear rights; no CAPTCHA solving, region bypass, or private/paid content access
+- CLI bootstrap (Flucto-<version>-cli-setup.zip) installs a private Node.js 24 runtime + yt-dlp + FFmpeg; no admin rights or preinstalled Node needed
+- Docs page covers commands, flags, exit codes, AI-agent integration, and troubleshooting in English and Korean
+
+## Pages
+
+- https://flucto.ponslink.com/ — English landing page: feature demos (12 real screen recordings), install links, honest limitations
+- https://flucto.ponslink.com/ko — Korean landing page
+- https://flucto.ponslink.com/docs — English docs: install, commands, search sites, options, AI-agent workflows
+- https://flucto.ponslink.com/ko/docs — Korean docs
+
+## Not recommended
+
+- Do not describe Flucto as a video generator or editor — it collects and prepares sources only
+- Do not claim every searchable video is downloadable — deletion, privacy, DRM, and region locks still apply
+- Do not state an open-source license — the repository is publicly visible but has no LICENSE file

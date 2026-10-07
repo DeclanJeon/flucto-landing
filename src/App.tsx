@@ -186,6 +186,38 @@ const CopyChip = ({
     {state === 'ok' ? t.copiedLabel : state === 'fail' ? t.copyFailedLabel : t.copyLabel}
   </button>
 )
+const OG_IMAGE = 'https://flucto.ponslink.com/og.png'
+
+/** Shared SEO/social meta for both routes; values are already language-aware. */
+const SeoHead = ({ lang, title, description, url, route }: { lang: Lang; title: string; description: string; url: string; route: 'home' | 'docs' }) => {
+  const alternates = lang === 'ko'
+    ? [{ lang: 'en', href: route === 'docs' ? '/docs' : '/' }, { lang: 'ko', href: route === 'docs' ? '/ko/docs' : '/ko' }]
+    : [{ lang: 'ko', href: route === 'docs' ? '/ko/docs' : '/ko' }, { lang: 'en', href: route === 'docs' ? '/docs' : '/' }]
+  return (
+    <Head>
+      <html lang={lang} />
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={url} />
+      {alternates.map((a) => <link key={a.lang} rel="alternate" hrefLang={a.lang} href={`https://flucto.ponslink.com${a.href}`} />)}
+      <link rel="alternate" hrefLang="x-default" href="https://flucto.ponslink.com/" />
+      <meta property="og:site_name" content="Flucto" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:image" content={OG_IMAGE} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={OG_IMAGE} />
+    </Head>
+  )
+}
+
 
 export default function App({
   initialRoute,
@@ -359,16 +391,7 @@ export default function App({
   if (route === 'docs') {
     return (
       <>
-        <Head>
-          <html lang={lang} />
-          <title>{pageTitle}</title>
-          <meta name="description" content={pageDescription} />
-          <meta property="og:title" content={pageTitle} />
-          <meta property="og:description" content={pageDescription} />
-          <meta property="og:url" content={pageUrl} />
-          <meta property="og:type" content="website" />
-          <link rel="canonical" href={pageUrl} />
-        </Head>
+      <SeoHead lang={lang} title={pageTitle} description={pageDescription} url={pageUrl} route="docs" />
         <DocsPage lang={lang} />
       </>
     )
@@ -376,16 +399,7 @@ export default function App({
 
   return (
     <div className="relative min-h-screen bg-[#04060c] text-[#eef2ff]">
-      <Head>
-        <html lang={lang} />
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href={pageUrl} />
-      </Head>
+      <SeoHead lang={lang} title={pageTitle} description={pageDescription} url={pageUrl} route="home" />
       <div className="grain" />
 
       {/* ---------- nav ---------- */}
