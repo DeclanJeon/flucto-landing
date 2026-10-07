@@ -8,6 +8,7 @@ const RELEASES_URL = 'https://github.com/DeclanJeon/flucto/releases'
 
 export type DocBlock =
   | { type: 'p'; text: string }
+  | { type: 'h3'; text: string }
   | { type: 'code'; lines: string[] }
   | { type: 'options'; rows: [string, string][] }
   | { type: 'list'; items: string[] }
@@ -25,9 +26,10 @@ const ko: DocSection[] = [
     id: 'quickstart',
     title: '빠른 시작',
     blocks: [
-      { type: 'p', text: 'npm 한 줄로 설치한다. 바이너리(yt-dlp/ffmpeg)는 첫 실행 때 자동으로 구성되므로 사전 준비는 Node.js 20+뿐이다.' },
-      commandBlock(['npm i -g flucto', 'fl doc -j                  # 설치 점검', 'fl s -j                    # 바이너리 수동 설치/갱신', 'fl t "https://www.youtube.com/watch?v=…" -l en -o ./notes -j']),
-      { type: 'p', text: '`fl` 과 `flucto` 두 이름 모두 등록된다. 자막 전용으로 쓸 거면 `fl s --yt-dlp-only -j` 로 ffmpeg 다운로드를 생략할 수 있다.' },
+      { type: 'p', text: 'GitHub Releases의 `Flucto-<version>-cli-setup.zip`을 받아 쓰기 가능한 폴더에 푼다. Windows는 `install.cmd`, macOS/Linux는 `bash install.sh` — Node.js나 관리자 권한이 필요 없다. 부트스트랩이 비공개 Node.js 24 런타임을 nodejs.org에서 받아 SHA256을 검증하고, 번들 CLI와 yt-dlp/FFmpeg를 비공개 접두사에 설치한다. 인터넷 연결이 필요하다.' },
+      commandBlock(['# 압축 해제 후', 'install.cmd                    # Windows', 'bash install.sh                # macOS / Linux', '', '# 새 셸에서 점검', 'flucto doctor --json', 'flucto setup --json            # 바이너리 수동 설치/갱신']),
+      { type: 'p', text: '`fl` 과 `flucto` 두 이름 모두 등록된다. 단, PowerShell은 `fl`을 `Format-List`로 예약하므로 PowerShell에서는 `flucto` 또는 `fl.cmd`를 쓴다 — `fl`은 cmd.exe와 POSIX 셸에서 동작한다. 자막 전용이면 `flucto setup --yt-dlp-only --json`으로 ffmpeg 다운로드를 생략할 수 있다.' },
+      { type: 'p', text: '격리 설치: `install.ps1 -InstallDir DIR -NoProfile` 또는 `install.sh --install-dir DIR --no-profile` — 영구 PATH 변경 없이 설치. Windows 부트스트랩의 실행 정책은 프로세스 범위라 사용자 정책을 바꾸지 않는다. 이미 Node.js 24가 있다면 `npm i -g flucto`도 가능하지만 필수는 아니다.' },
     ],
   },
   {
@@ -36,6 +38,7 @@ const ko: DocSection[] = [
     blocks: [
       { type: 'p', text: '모든 명령은 `-j`(`--json`)를 지원하며, 사람이 읽는 출력과 기계가 파싱하는 출력이 같은 엔진에서 나온다.' },
       commandBlock([
+        'flucto search "<keyword>"        # 12개 사이트 통합 검색',
         'flucto download <url>            # MP4/MP3 다운로드 (d)',
         'flucto batch <file>              # URL 목록 일괄 처리 (b)',
         'flucto transcript <url>          # 자막 → Markdown (t)',
@@ -54,6 +57,16 @@ const ko: DocSection[] = [
         '`t`(transcript) — 데스크톱 앱과 같은 포맷. 제목/메타데이터/타임스탬프 문단.',
         '`m`(md) — YAML 프론트매터 + 썸네일이 붙은 문서 지향 포맷. 옵시디언·블로그 파이프라인에 적합.',
       ] },
+    ],
+  },
+  {
+    id: 'search',
+    title: '검색',
+    blocks: [
+      { type: 'p', text: '`flucto search "<keyword>"`는 등록된 12개 사이트(YouTube · X · Reddit · Bilibili · Dailymotion · Niconico · OK.ru · VK Video · Instagram · Threads · TikTok · Vimeo)를 한 번에 검색한다. `--platform <site>`로 한 사이트만 고를 수 있다. `--limit`은 사이트별이 아니라 전체 결과 상한(1–50, 기본 20)이다.' },
+      commandBlock(['flucto search "nature" --limit 20 --json', 'flucto search "nature" --platform youtube --json', 'flucto search "初音ミク" --platform nicovideo --json']),
+      { type: 'p', text: '결과는 `native`/`index` 검색 방법과 출처 사이트를 표시하고, 실패한 사이트가 있어도 나머지 결과는 그대로 보인다 — 부분 실패와 빈 검색은 종료 코드 0, 전체 실패는 `error`와 함께 종료 코드 4다. 데스크톱의 Search videos 기본값은 All sites(통합 검색).' },
+      { type: 'p', text: 'X·Instagram·TikTok·Vimeo 검색, OK.ru·Threads 브라우저 검색과 모든 공개 인덱스 검색 경로는 로컬 Google Chrome(또는 `FLUCTO_CHROME_PATH`)이 필요하다. Bilibili·VK Video 등도 네이티브 검색이 제한되면 Chrome 기반 폴백을 쓴다. 브라우저 컨텍스트는 임시·익명으로 로그인 프로필을 읽지 않는다. CAPTCHA·지역 제한·유료/비공개 미디어 접근을 우회하지 않는다 — 검색되는 영상도 다운로드 시점에는 삭제·비공개·지역 제한일 수 있다.' },
     ],
   },
   {
@@ -136,21 +149,21 @@ const ko: DocSection[] = [
         ['5', 'transcript/md 실패 (자막 없음, rate limit 등)'],
         ['7', '배치 — 일부 항목 실패 (결과 JSON에 개수 포함)'],
       ] },
-      { type: 'p', text: '에이전트에 이렇게 시켜라: "npm으로 Flucto CLI(fl)를 설치하고, 이 채널의 최근 영상 자막을 Markdown 노트로 ./notes에 정리해줘: https://youtube.com/@handle"' },
+      { type: 'p', text: '에이전트에 이렇게 시켜라: "GitHub 릴리스의 Flucto cli-setup.zip(자체 Node 런타임 포함)으로 Flucto CLI를 설치하고, 이 채널의 최근 영상 자막을 Markdown 노트로 ./notes에 정리해줘: https://youtube.com/@handle"' },
     ],
   },
   {
     id: 'desktop',
     title: '데스크톱 앱',
     blocks: [
-      { type: 'p', text: 'CLI와 같은 TypeScript 엔진을 GUI로 감싼 것이다. 배치 큐, 포맷 프리셋, 다운로드 히스토리, 자막→Markdown 패널을 제공하며 Windows·macOS·Linux 인스톨러는 GitHub Releases에 있다.' },
+      { type: 'p', text: 'CLI와 같은 TypeScript 엔진을 GUI로 감싼 것이다. 배치 큐, 포맷 프리셋, 다운로드 히스토리, 12개 사이트 통합 검색, 자막→Markdown 패널을 제공하며 Windows·macOS·Linux 인스톨러는 GitHub Releases에 있다.' },
       { type: 'list', items: [
-        '앱 내 GitHub Star 버튼 — 토큰을 등록하면 클릭 한 번으로 별표시',
+        '통합 검색 — 사이트별 결과 개수·native/index 출처·실제 오류를 Search sources에서 확인',
         '고급 네트워크 설정 — cookies.txt/프록시를 UI에서 지정 (CLI의 --cookies와 동일 엔진)',
-        'yt-dlp 자동 갱신 — 24시간마다 최신 추출기를 확인해 스스로 치유한다',
-        '앱 업데이트 — electron-updater 내장, 인스톨러는 Releases에서',
+        'yt-dlp 자동 갱신 — 공식 nightly 채널을 추적해 추출기가 최신 상태를 유지한다',
+        '앱 업데이트 — Windows/Linux는 electron-updater; 미서명 macOS는 검증된 DMG를 받아 수동 교체',
       ] },
-      { type: 'p', text: 'CLI만 필요하면 앱을 설치할 필요가 없다. 반대로 앱 유저도 `fl` 을 쓰고 싶다면 `npm i -g flucto` — 같은 설정·같은 엔진이다.' },
+      { type: 'p', text: 'CLI만 필요하면 앱을 설치할 필요가 없다 — `cli-setup.zip`이 자체 Node 런타임을 가져온다. 앱 유저가 `fl`을 쓰고 싶다면 같은 ZIP 또는 `npm i -g flucto` — 같은 설정·같은 엔진이다.' },
     ],
   },
   {
@@ -162,7 +175,7 @@ const ko: DocSection[] = [
         ['TRANSCRIPT_UNAVAILABLE', '해당 영상에 자막이 없다. `fl l URL -j` 로 확인'],
         ['yt-dlp 추출 실패', '`fl s -j` 로 yt-dlp를 최신본으로 갱신 — YouTube 변화 대응은 대부분 여기서 끝난다'],
         ['ffmpeg 관련 오류', '자막 작업은 ffmpeg가 불필요하다. 다운로드가 필요하면 `fl s -j`'],
-        ['설치 후 명령을 못 찾음', 'npm 전역 bin 경로를 PATH에 추가 (`npm config get prefix`)'],
+        ['설치 후 명령을 못 찾음', '새 셸을 연다. 그래도 안 되면 설치 prefix의 bin을 PATH에 추가 — PowerShell에서는 `fl` 대신 `flucto`/`fl.cmd` 사용'],
       ] },
     ],
   },
@@ -173,9 +186,10 @@ const en: DocSection[] = [
     id: 'quickstart',
     title: 'Quick start',
     blocks: [
-      { type: 'p', text: 'Install with one npm command. Binaries (yt-dlp/ffmpeg) are provisioned automatically on first run — all you need is Node.js 20+.' },
-      commandBlock(['npm i -g flucto', 'fl doc -j                  # verify install', 'fl s -j                    # install/refresh binaries manually', 'fl t "https://www.youtube.com/watch?v=…" -l en -o ./notes -j']),
-      { type: 'p', text: 'Both `fl` and `flucto` are registered. Transcripts only? Skip the ffmpeg download with `fl s --yt-dlp-only -j`.' },
+      { type: 'p', text: 'Download `Flucto-<version>-cli-setup.zip` from GitHub Releases and extract it into a writable folder. Run `install.cmd` on Windows or `bash install.sh` on macOS/Linux — no existing Node.js and no admin rights required. The bootstrap downloads a private Node.js 24 runtime from nodejs.org, verifies its SHA256, and installs the bundled CLI plus yt-dlp/FFmpeg under a private prefix. Internet access is required.' },
+      commandBlock(['# after extracting', 'install.cmd                    # Windows', 'bash install.sh                # macOS / Linux', '', '# verify in a new shell', 'flucto doctor --json', 'flucto setup --json            # provision/refresh binaries manually']),
+      { type: 'p', text: 'Both `fl` and `flucto` are registered. Note that PowerShell reserves `fl` for `Format-List` — use `flucto` or `fl.cmd` there; `fl` works in cmd.exe and POSIX shells. Transcripts only? Skip the ffmpeg download with `flucto setup --yt-dlp-only --json`.' },
+      { type: 'p', text: 'Isolated install without persistent PATH changes: `install.ps1 -InstallDir DIR -NoProfile` or `install.sh --install-dir DIR --no-profile`. The Windows bootstrap execution policy is process-scoped — it does not change your user policy. If you already run Node.js 24, `npm i -g flucto` also works but is not required.' },
     ],
   },
   {
@@ -184,6 +198,7 @@ const en: DocSection[] = [
     blocks: [
       { type: 'p', text: 'Every command supports `-j` (`--json`). Human output and machine output come from the same engine.' },
       commandBlock([
+        'flucto search "<keyword>"        # integrated search across 12 sites',
         'flucto download <url>            # MP4/MP3 download (d)',
         'flucto batch <file>              # batch from a URL list (b)',
         'flucto transcript <url>          # captions → Markdown (t)',
@@ -202,6 +217,16 @@ const en: DocSection[] = [
         '`t` (transcript) — same format as the desktop app: title, metadata, timestamped paragraphs.',
         '`m` (md) — document-oriented: YAML frontmatter + thumbnail. Great for Obsidian/blog pipelines.',
       ] },
+    ],
+  },
+  {
+    id: 'search',
+    title: 'Search',
+    blocks: [
+      { type: 'p', text: '`flucto search "<keyword>"` searches 12 registered sites: YouTube · X · Reddit · Bilibili · Dailymotion · Niconico · OK.ru · VK Video · Instagram · Threads · TikTok · Vimeo. Select one with `--platform <site>`; IDs include `youtube`, `x`, `reddit`, `bilibili`, `dailymotion`, `nicovideo`, `ok`, `vkvideo`, `instagram`, `threads`, `tiktok`, and `vimeo`. `--limit` caps total results, not each site (1–50, default 20).' },
+      commandBlock(['flucto search "nature" --limit 20 --json', 'flucto search "nature" --platform youtube --json', 'flucto search "初音ミク" --platform nicovideo --json']),
+      { type: 'p', text: 'Results identify their source and `native`/`index` method. Partial failures retain other results; partial failure and empty searches exit 0, while total failure returns `error` and exits 4. The desktop Search videos default is All sites (integrated).' },
+      { type: 'p', text: 'Search on X, Instagram, TikTok, and Vimeo, browser search on OK.ru and Threads, and every public-index path require local Google Chrome (or `FLUCTO_CHROME_PATH`). Bilibili, VK Video, and other providers also use Chrome-based fallbacks when native search is restricted. Contexts are temporary and anonymous; your logged-in profile is not read. No CAPTCHA, region, paid-content, or private-content bypass. A searchable video may still be deleted, private, or region-locked when downloaded.' },
     ],
   },
   {
@@ -284,21 +309,21 @@ const en: DocSection[] = [
         ['5', 'transcript/md failure (no captions, rate limit …)'],
         ['7', 'batch — some items failed (counts in the result JSON)'],
       ] },
-      { type: 'p', text: 'Just tell your agent: "Install the Flucto CLI (fl) via npm, then turn this channel\'s recent captions into Markdown notes in ./notes: https://youtube.com/@handle"' },
+      { type: 'p', text: 'Just tell your agent: "Install the Flucto CLI from the GitHub release cli-setup.zip (it brings its own Node runtime), then turn this channel\'s recent captions into timestamped Markdown notes in ./notes: https://youtube.com/@handle"' },
     ],
   },
   {
     id: 'desktop',
     title: 'Desktop app',
     blocks: [
-      { type: 'p', text: 'The same TypeScript engine behind a GUI: batch queue, format presets, download history, and a captions→Markdown panel. Installers for Windows, macOS and Linux live on GitHub Releases.' },
+      { type: 'p', text: 'The same TypeScript engine behind a GUI: batch queue, format presets, download history, integrated search across 12 sites, and a captions→Markdown panel. Installers for Windows, macOS and Linux live on GitHub Releases.' },
       { type: 'list', items: [
-        'In-app GitHub Star button — register a token and star with one click',
+        'Integrated search — per-site counts, native/index attribution, and real errors under Search sources',
         'Advanced network settings — cookies.txt/proxy from the UI (same engine as --cookies)',
-        'yt-dlp auto-refresh — checks for a fresh extractor every 24h and self-heals',
-        'App updates — electron-updater built in; installers on Releases',
+        'yt-dlp auto-refresh — follows the official nightly channel so extractors stay current',
+        'App updates — electron-updater on Windows/Linux; unsigned macOS downloads a verified DMG for manual replacement',
       ] },
-      { type: 'p', text: 'Only need the CLI? Skip the app entirely. Want `fl` alongside the app? `npm i -g flucto` — same settings, same engine.' },
+      { type: 'p', text: 'Only need the CLI? Skip the app — `cli-setup.zip` brings its own Node runtime. Want `fl` alongside the app? Same ZIP or `npm i -g flucto` — same settings, same engine.' },
     ],
   },
   {
@@ -310,7 +335,7 @@ const en: DocSection[] = [
         ['TRANSCRIPT_UNAVAILABLE', 'This media has no captions. Check with `fl l URL -j`'],
         ['yt-dlp extraction failures', '`fl s -j` refreshes yt-dlp — most YouTube breakage ends here'],
         ['ffmpeg errors', 'Transcripts do not need ffmpeg. Downloads do — `fl s -j`'],
-        ['command not found after install', 'Add the npm global bin dir to PATH (`npm config get prefix`)'],
+        ['command not found after install', 'Open a new shell. Still missing? Add the install prefix\'s bin dir to PATH — in PowerShell use `flucto`/`fl.cmd`, not `fl`'],
       ] },
     ],
   },
@@ -330,25 +355,37 @@ const Inline = ({ text }: { text: string }) => (
   </>
 )
 
-const CodeBlock = ({ lines }: { lines: string[] }) => {
-  const [copied, setCopied] = useState(false)
+const CodeBlock = ({ lines, lang }: { lines: string[]; lang: Lang }) => {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const text = lines.join('\n')
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1400)
-    } catch { /* ignore */ }
+      setState('copied')
+      setTimeout(() => setState('idle'), 1400)
+    } catch {
+      // Clipboard can be blocked (permissions/insecure context) — show it
+      // instead of failing silently.
+      setState('failed')
+      setTimeout(() => setState('idle'), 2400)
+    }
   }
   return (
     <div className="group relative rounded-xl border border-white/8 bg-black/40">
       <button
         onClick={() => void copy()}
-        aria-label="copy"
-        className="absolute right-2.5 top-2.5 rounded-lg border border-white/10 bg-white/[.04] p-1.5 text-white/40 opacity-0 transition group-hover:opacity-100 hover:text-white"
+        aria-label={state === 'failed' ? (lang === 'ko' ? '복사 불가 — 수동 선택' : 'copy unavailable — select manually') : 'copy'}
+        className={`absolute right-2.5 top-2.5 rounded-lg border border-white/10 bg-white/[.04] p-1.5 text-white/40 transition hover:text-white ${
+          state === 'failed' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+        }`}
       >
-        {copied ? <Check size={12} className="accent" /> : <Copy size={12} />}
+        {state === 'copied' ? <Check size={12} className="accent" /> : state === 'failed' ? <span className="px-0.5 text-[10px] text-red-300">!</span> : <Copy size={12} />}
       </button>
+      {state === 'failed' && (
+        <p className="px-4 pt-2.5 text-[10px] text-red-300/80">
+          {lang === 'ko' ? '복사할 수 없습니다 — 텍스트를 직접 선택해 복사하세요' : 'Clipboard unavailable — select the text manually'}
+        </p>
+      )}
       <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed text-white/75">{text}</pre>
     </div>
   )
@@ -371,7 +408,7 @@ export function DocsPage({ lang }: { lang: Lang }) {
       <div className="grain" />
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#04060c]/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-          <a href="#/" className="flex items-center gap-2.5">
+          <a href={lang === 'ko' ? '/ko' : '/'} className="flex items-center gap-2.5">
             <BrandMarkSmall />
             <span className="display text-lg leading-none">Flucto</span>
             <span className="eyebrow ml-1 hidden sm:inline">DOCS</span>
@@ -418,8 +455,8 @@ export function DocsPage({ lang }: { lang: Lang }) {
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/55 md:text-base">
             {lang === 'ko'
-              ? 'CLI · 데스크톱 앱 · AI 에이전트 연동까지의 전체 레퍼런스. 모든 예제는 v1.16 이상 기준이다.'
-              : 'The complete reference for the CLI, the desktop app, and AI-agent workflows. All examples assume v1.16+.'}
+              ? 'CLI · 데스크톱 앱 · AI 에이전트 연동까지의 전체 레퍼런스. 모든 예제는 v1.18 이상 기준이다.'
+              : 'The complete reference for the CLI, the desktop app, and AI-agent workflows. All examples assume v1.18+.'}
           </p>
 
           {sections.map((section) => (
@@ -432,7 +469,7 @@ export function DocsPage({ lang }: { lang: Lang }) {
                   case 'h3':
                     return <h3 key={index} className="display mt-8 text-xl">{block.text}</h3>
                   case 'code':
-                    return <div key={index} className="mt-4"><CodeBlock lines={block.lines} /></div>
+                    return <div key={index} className="mt-4"><CodeBlock lines={block.lines} lang={lang} /></div>
                   case 'list':
                     return (
                       <ul key={index} className="mt-4 space-y-2">
@@ -467,7 +504,7 @@ export function DocsPage({ lang }: { lang: Lang }) {
               <a href={RELEASES_URL} target="_blank" rel="noopener" className="inline-flex items-center gap-2 rounded-full bg-[#3ee0ff] px-6 py-3 text-sm font-bold text-[#04060c] hover:bg-[#7deaff]">
                 {t.ctaDownload} <Download size={15} />
               </a>
-              <a href="#/" className="pill inline-flex items-center gap-2 bg-white/[.04] px-6 py-3 text-sm text-white/75 hover:border-[#3ee0ff]/40">
+              <a href={lang === 'ko' ? '/ko' : '/'} className="pill inline-flex items-center gap-2 bg-white/[.04] px-6 py-3 text-sm text-white/75 hover:border-[#3ee0ff]/40">
                 ← {lang === 'ko' ? '메인으로' : 'Back home'}
               </a>
             </div>

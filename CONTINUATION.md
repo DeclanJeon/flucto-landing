@@ -1,6 +1,6 @@
 # Flucto Landing — State / Handoff
 
-State: **DONE** — history router + SSG migration shipped, deployed, verified live.
+State: **READY TO DEPLOY** — branch `feat/creator-demo-homepage`: AI-video-creator homepage redesign (12-clip demo gallery under `public/demos/`, four-installer section, honest-limits FAQ, docs updated to v1.18 / 12 sites / cli-setup.zip bootstrap). Verified with `npm run lint`, `npm run build`, and browser QA of all 12 posters plus English/Korean docs; push to `main` deploys.
 
 ## Context
 - Branch: `main`
